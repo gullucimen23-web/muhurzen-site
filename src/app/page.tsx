@@ -129,6 +129,24 @@ export default function Home() {
       });
 
       setOrderId(ref.id);
+
+      await fetch("/api/telegram", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "new_order",
+          orderId: ref.id,
+          name: form.name,
+          phone: form.phone,
+          city: form.city,
+          intentTitle: selected.title,
+          amount: 1490,
+          paymentStatus: "bekliyor",
+        }),
+      });
+
       setStep("payment");
       window.location.hash = "odeme";
     } catch (err) {
@@ -152,6 +170,24 @@ export default function Home() {
         paidNotifiedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+
+      await fetch("/api/telegram", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "payment_notified",
+          orderId,
+          name: form.name,
+          phone: form.phone,
+          city: form.city,
+          intentTitle: selected.title,
+          amount: 1490,
+          paymentStatus: "odeme_bildirildi",
+        }),
+      });
+
       setStep("done");
       window.location.hash = "tamamlandi";
     } catch (err) {
