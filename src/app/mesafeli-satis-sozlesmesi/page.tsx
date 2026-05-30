@@ -1,2 +1,16 @@
-export default function Page(){return <Legal title="Mesafeli Satış Sözleşmesi" body="Bu sayfa, satıcı bilgileri, ürün bilgileri, ödeme, teslimat, cayma hakkı ve uyuşmazlık süreçleri için taslak alanıdır. Şirket/şahıs işletmesi bilgileriniz netleştiğinde resmi sözleşme metniyle güncellenmelidir."/>}
-function Legal({title,body}:{title:string;body:string}){return <main className="min-h-screen bg-black px-6 py-16 text-white"><div className="mx-auto max-w-3xl"><a href="/" className="text-amber-400">← Ana sayfa</a><h1 className="mt-8 text-4xl font-black">{title}</h1><p className="mt-6 leading-8 text-zinc-300">{body}</p></div></main>}
+export default function Page() {
+  return (
+    <main className="min-h-screen bg-black px-5 py-16 text-white">
+      <div className="mx-auto max-w-3xl rounded-3xl border border-zinc-800 bg-zinc-950 p-8">
+        <a href="/" className="text-amber-400">← Ana sayfa</a>
+        <h1 className="mt-6 text-4xl font-black">mesafeli-satis-sozlesmesi</h1>
+        <p className="mt-5 leading-8 text-zinc-300">
+          Bu sayfa MuhurZen için hazırlanmış bilgilendirme metnidir. Ödeme altyapısı aktif edilmeden önce şirket bilgileri, adres, vergi bilgileri, iletişim ve sözleşme detayları netleştirilerek güncellenecektir.
+        </p>
+        <p className="mt-5 leading-8 text-zinc-300">
+          Ürünler kişisel kullanım ve hediye amaçlı özel tasarım aksesuar olarak sunulur. Tıbbi, psikolojik, finansal veya manevi sonuç garantisi verilmez.
+        </p>
+      </div>
+    </main>
+  );
+}

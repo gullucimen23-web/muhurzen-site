@@ -3,260 +3,328 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 
-type Intent = "iliski" | "bereket" | "enerji";
+type Flow = "iliski" | "enerji" | "bereket";
+
+type FormState = {
+  intent: Flow;
+  name: string;
+  motherName: string;
+  birthDate: string;
+  partnerName: string;
+  partnerMotherName: string;
+  partnerBirthDate: string;
+  relationshipStatus: string;
+  focusArea: string;
+  q1: string;
+  q2: string;
+  q3: string;
+  note: string;
+};
 
 const intents = {
   iliski: {
-    emoji: "❤️",
+    label: "İlişki & Uyum",
+    eyebrow: "İlişki niyeti",
     title: "İlişki ve Uyum Niyeti",
-    short: "İlişki & Uyum",
-    description:
-      "İlişkilerinde uyum, anlayış ve bağ hissine odaklanmak isteyenler için kişisel tasarım seçeneği.",
-  },
-  bereket: {
-    emoji: "💰",
-    title: "Bereket ve Motivasyon Niyeti",
-    short: "Bereket & Motivasyon",
-    description:
-      "İş, kariyer, hedefler ve yaşam motivasyonuna odaklanan kişisel tasarım seçeneği.",
+    desc: "İlişkilerinde uyum, anlayış ve bağ hissine odaklanmak isteyenler için kişisel hazırlık seçeneği.",
   },
   enerji: {
-    emoji: "✨",
+    label: "Enerji & Odak",
+    eyebrow: "Mini test",
     title: "Enerji ve Odak Niyeti",
-    short: "Enerji & Odak",
-    description:
-      "Son dönemde kendini düşük, kararsız veya dağınık hissedenler için odak ve yenilenme hissine yönelik tasarım seçeneği.",
+    desc: "Son dönemde kendini yorgun, dağınık veya motivasyonsuz hissedenler için kişisel anlam taşıyan tasarım.",
+  },
+  bereket: {
+    label: "Bereket & Motivasyon",
+    eyebrow: "Hedef niyeti",
+    title: "Bereket ve Motivasyon Niyeti",
+    desc: "İş, kariyer, hedef ve yaşam motivasyonuna odaklanan kişisel tasarım seçeneği.",
   },
 };
 
-const relationStatuses = ["Evli", "Nişanlı", "Sevgili", "Flört", "Uzak Mesafe", "Ayrı / Görüşmüyor"];
-const moneyFocus = ["İş Hayatı", "Kariyer", "Maddi Hedefler", "Yeni Başlangıç", "Genel Motivasyon"];
-const energyFocus = ["Motivasyon Eksikliği", "Odak Sorunu", "Kararsızlık", "Yeni Dönem", "Kendimi Düşük Hissediyorum"];
+const initialForm: FormState = {
+  intent: "iliski",
+  name: "",
+  motherName: "",
+  birthDate: "",
+  partnerName: "",
+  partnerMotherName: "",
+  partnerBirthDate: "",
+  relationshipStatus: "",
+  focusArea: "",
+  q1: "",
+  q2: "",
+  q3: "",
+  note: "",
+};
 
 export default function Home() {
-  const [intent, setIntent] = useState<Intent>("iliski");
-  const [answers, setAnswers] = useState({ q1: "", q2: "", q3: "" });
-  const [form, setForm] = useState({
-    name: "",
-    motherName: "",
-    birthDate: "",
-    partnerName: "",
-    partnerMotherName: "",
-    partnerBirthDate: "",
-    relationStatus: relationStatuses[0],
-    focus: moneyFocus[0],
-    energyState: energyFocus[0],
-    note: "",
-  });
+  const [form, setForm] = useState<FormState>(initialForm);
+  const [showResult, setShowResult] = useState(false);
 
-  const quizResult = useMemo<Intent>(() => {
-    const text = `${answers.q1} ${answers.q2} ${answers.q3}`.toLowerCase();
-    if (text.includes("ilişki") || text.includes("uyum") || text.includes("eş") || text.includes("partner")) return "iliski";
-    if (text.includes("iş") || text.includes("kariyer") || text.includes("maddi") || text.includes("hedef")) return "bereket";
-    if (text.includes("düşük") || text.includes("odak") || text.includes("kararsız") || text.includes("enerji")) return "enerji";
-    return intent;
-  }, [answers, intent]);
+  const selected = intents[form.intent];
 
-  const selected = intents[intent];
+  const resultText = useMemo(() => {
+    if (form.intent === "iliski") {
+      return "Yanıtlarınıza göre İlişki & Uyum niyeti sizin talebinize daha yakın görünüyor. Bu seçenek, kişiye özel bilgiler ve partner bilgileriyle hazırlık sürecine alınır.";
+    }
+    if (form.intent === "enerji") {
+      return "Yanıtlarınıza göre Enerji & Odak niyeti sizin talebinize daha yakın görünüyor. Bu seçenek, günlük motivasyon, odak ve kişisel denge hissine yönelik sembolik bir aksesuar olarak hazırlanır.";
+    }
+    return "Yanıtlarınıza göre Bereket & Motivasyon niyeti sizin talebinize daha yakın görünüyor. Bu seçenek, hedefler, iş hayatı ve yeni başlangıçlara odaklanan kişisel tasarım olarak hazırlanır.";
+  }, [form.intent]);
 
-  const whatsappMessage = encodeURIComponent(
-    `Merhaba, MuhurZen Bakır Mühür Bilekliği siparişi vermek istiyorum.\n\n` +
-      `Seçilen Niyet: ${selected.title}\n` +
-      `Ad Soyad: ${form.name}\n` +
-      `Anne Adı: ${form.motherName}\n` +
-      `Doğum Tarihi: ${form.birthDate}\n` +
-      (intent === "iliski"
-        ? `\nEş/Partner Adı: ${form.partnerName}\nEş/Partner Anne Adı: ${form.partnerMotherName}\nEş/Partner Doğum Tarihi: ${form.partnerBirthDate}\nİlişki Durumu: ${form.relationStatus}`
-        : "") +
-      (intent === "bereket" ? `\nOdak Alanı: ${form.focus}` : "") +
-      (intent === "enerji" ? `\nSon Dönem Hissi: ${form.energyState}` : "") +
-      `\nEk Not: ${form.note}`
-  );
+  const update = (key: keyof FormState, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    setShowResult(false);
+  };
 
-  function updateForm(name: string, value: string) {
-    setForm((prev) => ({ ...prev, [name]: value }));
-  }
-
-  function updateAnswer(name: string, value: string) {
-    const next = { ...answers, [name]: value };
-    setAnswers(next);
-    const text = `${next.q1} ${next.q2} ${next.q3}`.toLowerCase();
-    if (text.includes("ilişki") || text.includes("uyum") || text.includes("eş") || text.includes("partner")) setIntent("iliski");
-    else if (text.includes("iş") || text.includes("kariyer") || text.includes("maddi") || text.includes("hedef")) setIntent("bereket");
-    else if (text.includes("düşük") || text.includes("odak") || text.includes("kararsız") || text.includes("enerji")) setIntent("enerji");
-  }
+  const whatsappMessage = encodeURIComponent(`MuhurZen sipariş talebi\n\nNiyet: ${selected.title}\nAd Soyad: ${form.name}\nAnne Adı: ${form.motherName}\nDoğum Tarihi: ${form.birthDate}\nPartner Adı: ${form.partnerName}\nPartner Anne Adı: ${form.partnerMotherName}\nPartner Doğum Tarihi: ${form.partnerBirthDate}\nİlişki Durumu: ${form.relationshipStatus}\nOdak Alanı: ${form.focusArea}\nSoru 1: ${form.q1}\nSoru 2: ${form.q2}\nSoru 3: ${form.q3}\nNot: ${form.note}\n\nÜrün: MuhurZen Bakır Mühür Bilekliği\nFiyat: 1490 TL`);
 
   return (
     <main className="min-h-screen bg-black text-white">
-      <header className="sticky top-0 z-50 border-b border-zinc-900 bg-black/80 backdrop-blur">
-        <div className="container mx-auto flex items-center justify-between px-6 py-4">
-          <a href="#hero" className="text-xl font-black tracking-tight">Muhur<span className="text-amber-400">Zen</span></a>
-          <nav className="hidden items-center gap-7 text-sm text-zinc-300 md:flex">
-            <a href="#quiz" className="hover:text-white">Mini Test</a>
-            <a href="#siparis" className="hover:text-white">Sipariş</a>
+      <header className="sticky top-0 z-50 border-b border-zinc-900 bg-black/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+          <a href="#" className="text-xl font-black tracking-tight">
+            Muhur<span className="text-amber-400">Zen</span>
+          </a>
+          <nav className="hidden items-center gap-6 text-sm text-zinc-300 md:flex">
+            <a href="#test" className="hover:text-white">Mini Test</a>
+            <a href="#hazirlik" className="hover:text-white">Hazırlık</a>
             <a href="#sss" className="hover:text-white">SSS</a>
           </nav>
-          <a href="#siparis" className="rounded-full bg-amber-500 px-5 py-2 text-sm font-bold text-black hover:bg-amber-400">Bilekliğini Oluştur</a>
+          <a href="#siparis" className="rounded-full bg-amber-500 px-5 py-2 text-sm font-bold text-black hover:bg-amber-400">
+            Bilekliğini Oluştur
+          </a>
         </div>
       </header>
 
-      <section id="hero" className="container mx-auto px-6 py-20 md:py-28">
-        <div className="grid items-center gap-16 lg:grid-cols-2">
-          <div>
-            <span className="rounded-full border border-amber-500/30 px-4 py-2 text-sm text-amber-300">MuhurZen® Kişiye Özel Tasarım</span>
-            <h1 className="mt-8 text-5xl font-black leading-tight md:text-7xl">Kişiye Özel<br />Bakır Mühür<br />Bilekliği</h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-zinc-300">Geleneksel sembollerden ilham alan, kişisel kullanım ve hediye amaçlı hazırlanan özel tasarım bakır bileklik.</p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              {["Kişiye Özel Hazırlık", "Bakır İşçilik", "Özel Kutu", "Türkiye Geneli Gönderim"].map((item) => (
-                <div key={item} className="rounded-full bg-zinc-900 px-4 py-2 text-sm">✓ {item}</div>
-              ))}
-            </div>
-            <div className="mt-10 flex flex-wrap gap-4">
-              <a href="#siparis" className="rounded-full bg-amber-500 px-8 py-4 font-bold text-black transition hover:bg-amber-400">Siparişe Başla</a>
-              <a href="#quiz" className="rounded-full border border-zinc-700 px-8 py-4 font-semibold transition hover:bg-zinc-900">Sana Uygun Niyeti Bul</a>
-            </div>
+      <section className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 lg:grid-cols-2 lg:py-24">
+        <div>
+          <div className="inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-300">
+            MuhurZen® kişiye özel hazırlık
           </div>
+          <h1 className="mt-7 text-5xl font-black leading-[0.95] tracking-tight md:text-7xl">
+            İsme Özel Hazırlanan Bakır Mühür Bilekliği
+          </h1>
+          <p className="mt-6 max-w-xl text-lg leading-8 text-zinc-300">
+            Geleneksel sembollerden ilham alan, ad ve doğum bilgilerine göre kişisel anlam taşıyacak şekilde hazırlanan özel tasarım bakır aksesuar.
+          </p>
+          <div className="mt-7 grid gap-3 sm:grid-cols-2">
+            {["Kişiye özel hazırlanır", "Partner bilgisi eklenebilir", "Özel kutu ile gönderilir", "Ücretsiz kargo seçeneği"].map((item) => (
+              <div key={item} className="rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-200">✓ {item}</div>
+            ))}
+          </div>
+          <div className="mt-9 flex flex-wrap gap-4">
+            <a href="#test" className="rounded-full bg-amber-500 px-8 py-4 font-black text-black hover:bg-amber-400">Sana Uygun Niyeti Bul</a>
+            <a href="#siparis" className="rounded-full border border-zinc-700 px-8 py-4 font-bold hover:bg-zinc-900">Sipariş Formu</a>
+          </div>
+          <div className="mt-7 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-100">
+            Bugün özel hazırlık kontenjanı: <b>7 / 15</b> sipariş kaldı.
+          </div>
+        </div>
 
-          <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-amber-500/10 blur-3xl" />
-            <div className="relative overflow-hidden rounded-[32px] border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
-              <Image src="/images/bileklik-1.jpg" alt="MuhurZen kişiye özel bakır mühür bilekliği" width={900} height={900} className="rounded-3xl" priority />
-              <div className="mt-6 flex items-center justify-between gap-4">
-                <div><p className="text-sm text-zinc-400">Kişiye Özel Hazırlanır</p><h3 className="text-2xl font-black">MuhurZen Bilekliği</h3></div>
-                <div className="text-right"><p className="text-sm text-zinc-400">Tanışma Fiyatı</p><p className="text-3xl font-black text-amber-400">₺1490</p></div>
+        <div className="relative">
+          <div className="absolute inset-0 rounded-full bg-amber-500/20 blur-3xl" />
+          <div className="relative overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 p-5 shadow-2xl">
+            <Image src="/images/bileklik-1.jpg" alt="MuhurZen bakır mühür bilekliği" width={900} height={900} className="rounded-[1.5rem]" priority />
+            <div className="mt-5 flex items-end justify-between gap-4">
+              <div>
+                <p className="text-sm text-zinc-400">Özel hazırlık dahil</p>
+                <h2 className="text-2xl font-black">MuhurZen Bilekliği</h2>
+                <p className="mt-1 text-xs text-zinc-500">Özel kutu + ücretsiz kargo seçeneği</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-zinc-400 line-through">₺1990</p>
+                <p className="text-3xl font-black text-amber-400">₺1490</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="container mx-auto px-6 py-12">
-        <div className="grid gap-5 md:grid-cols-4">
+      <section className="mx-auto max-w-7xl px-5 py-8">
+        <div className="grid gap-4 md:grid-cols-4">
+          {["500+ hazırlık talebi", "Türkiye geneli gönderim", "Gizli bilgi işleme", "WhatsApp destek hattı"].map((item) => (
+            <div key={item} className="rounded-3xl border border-zinc-800 bg-zinc-950 p-5 font-bold">✓ {item}</div>
+          ))}
+        </div>
+      </section>
+
+      <section id="test" className="mx-auto max-w-7xl px-5 py-16">
+        <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950 p-6 md:p-10">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Mini Test</p>
+          <h2 className="mt-3 text-4xl font-black">Sana uygun niyet alanını keşfet.</h2>
+          <p className="mt-4 max-w-2xl text-zinc-400">Bu test kesin bir tespit sunmaz; verdiğiniz yanıtlara göre size en yakın kişisel tasarım seçeneğini önerir.</p>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {Object.entries(intents).map(([key, item]) => (
+              <button
+                key={key}
+                onClick={() => update("intent", key as Flow)}
+                className={`rounded-3xl border p-5 text-left transition ${form.intent === key ? "border-amber-500 bg-amber-500/10" : "border-zinc-800 bg-black hover:border-zinc-600"}`}
+              >
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">{item.eyebrow}</p>
+                <h3 className="mt-2 text-xl font-black">{item.label}</h3>
+                <p className="mt-3 text-sm leading-6 text-zinc-400">{item.desc}</p>
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <select value={form.q1} onChange={(e) => update("q1", e.target.value)} className="rounded-2xl border border-zinc-800 bg-black px-4 py-4 outline-none focus:border-amber-500">
+              <option value="">Son dönemde neye odaklanıyorsun?</option>
+              <option>İlişkilerimde uyum arıyorum</option>
+              <option>İş ve para konularında tıkanıklık hissediyorum</option>
+              <option>Kendimi yorgun ve dağınık hissediyorum</option>
+            </select>
+            <select value={form.q2} onChange={(e) => update("q2", e.target.value)} className="rounded-2xl border border-zinc-800 bg-black px-4 py-4 outline-none focus:border-amber-500">
+              <option value="">Son günlerde nasıl hissediyorsun?</option>
+              <option>Uzaklaşma ve uyumsuzluk hissi</option>
+              <option>Motivasyon eksikliği</option>
+              <option>Yeni başlangıç ihtiyacı</option>
+            </select>
+            <select value={form.q3} onChange={(e) => update("q3", e.target.value)} className="rounded-2xl border border-zinc-800 bg-black px-4 py-4 outline-none focus:border-amber-500">
+              <option value="">Bilekliği hangi amaçla düşünüyorsun?</option>
+              <option>Kendim için</option>
+              <option>İlişkim için</option>
+              <option>Anlamlı bir hediye olarak</option>
+            </select>
+          </div>
+
+          <div className="mt-6 rounded-3xl border border-amber-500/30 bg-amber-500/10 p-6">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-amber-400">Önerilen Alan</p>
+            <h3 className="mt-2 text-2xl font-black">{selected.title}</h3>
+            <p className="mt-3 max-w-3xl text-zinc-300">{resultText}</p>
+            <a href="#siparis" className="mt-5 inline-flex rounded-full bg-amber-500 px-6 py-3 font-black text-black hover:bg-amber-400">Bu Niyetle Devam Et</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="hazirlik" className="mx-auto max-w-7xl px-5 py-16">
+        <div className="grid gap-10 lg:grid-cols-2">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Nasıl Hazırlanıyor?</p>
+            <h2 className="mt-3 text-4xl font-black">Seri üretim değil, kişiye özel hazırlık.</h2>
+            <div className="mt-8 grid gap-4">
+              {["Bilgilerini ve niyet alanını gönderirsin.", "Hazırlık süreci kişisel bilgilerle başlatılır.", "Bileklik özel kutusunda paketlenir.", "Kargo bilgisi WhatsApp üzerinden paylaşılır."].map((item, i) => (
+                <div key={item} className="flex gap-4 rounded-3xl border border-zinc-800 bg-zinc-950 p-5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500 font-black text-black">{i + 1}</div>
+                  <p className="pt-2 text-zinc-300">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <Image src="/images/bileklik-2.jpg" alt="MuhurZen bileklik dış yüzey detayı" width={900} height={900} className="rounded-[2rem] border border-zinc-800 object-cover" />
+        </div>
+      </section>
+
+      <section id="siparis" className="mx-auto max-w-7xl px-5 py-16">
+        <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950 p-6 md:p-10">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Sipariş Formu</p>
+          <h2 className="mt-3 text-4xl font-black">Bilgilerini ekle, hazırlık talebini oluştur.</h2>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {Object.entries(intents).map(([key, item]) => (
+              <button key={key} onClick={() => update("intent", key as Flow)} className={`rounded-3xl border p-5 text-left ${form.intent === key ? "border-amber-500 bg-amber-500/10" : "border-zinc-800 bg-black"}`}>
+                <h3 className="text-lg font-black">{item.label}</h3>
+                <p className="mt-2 text-sm text-zinc-400">{item.desc}</p>
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Ad Soyad" className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
+            <input value={form.motherName} onChange={(e) => update("motherName", e.target.value)} placeholder="Anne Adı" className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
+            <input value={form.birthDate} onChange={(e) => update("birthDate", e.target.value)} type="date" className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
+          </div>
+
+          {form.intent === "iliski" && (
+            <div className="mt-6 rounded-3xl border border-zinc-800 bg-black p-5">
+              <h3 className="text-xl font-black">Eş / Partner Bilgileri</h3>
+              <div className="mt-4 grid gap-4 md:grid-cols-3">
+                <input value={form.partnerName} onChange={(e) => update("partnerName", e.target.value)} placeholder="Partner Adı" className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />
+                <input value={form.partnerMotherName} onChange={(e) => update("partnerMotherName", e.target.value)} placeholder="Partner Anne Adı" className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />
+                <input value={form.partnerBirthDate} onChange={(e) => update("partnerBirthDate", e.target.value)} type="date" className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />
+              </div>
+              <select value={form.relationshipStatus} onChange={(e) => update("relationshipStatus", e.target.value)} className="mt-4 w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500">
+                <option value="">İlişki Durumu</option>
+                <option>Evli</option>
+                <option>Nişanlı</option>
+                <option>Sevgili</option>
+                <option>Flört</option>
+                <option>Uzak mesafe / ayrı</option>
+              </select>
+            </div>
+          )}
+
+          {(form.intent === "bereket" || form.intent === "enerji") && (
+            <select value={form.focusArea} onChange={(e) => update("focusArea", e.target.value)} className="mt-6 w-full rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500">
+              <option value="">Odak Alanı Seç</option>
+              <option>İş hayatı</option>
+              <option>Kariyer</option>
+              <option>Maddi hedefler</option>
+              <option>Motivasyon ve odak</option>
+              <option>Yeni başlangıç</option>
+            </select>
+          )}
+
+          <textarea value={form.note} onChange={(e) => update("note", e.target.value)} placeholder="Eklemek istediğiniz özel not..." className="mt-4 min-h-32 w-full rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
+
+          <button onClick={() => setShowResult(true)} className="mt-6 rounded-full border border-amber-500 px-7 py-4 font-black text-amber-300 hover:bg-amber-500/10">
+            Ön Sonucu Gör
+          </button>
+
+          {showResult && (
+            <div className="mt-6 rounded-3xl border border-amber-500/30 bg-amber-500/10 p-6">
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-amber-400">Uyumlu Öneri</p>
+              <h3 className="mt-2 text-2xl font-black">{selected.title}</h3>
+              <p className="mt-3 text-zinc-300">{resultText}</p>
+            </div>
+          )}
+
+          <div className="mt-6 rounded-2xl bg-zinc-900 p-5 text-sm leading-6 text-zinc-300">
+            Bu ürün dekoratif ve kişisel kullanım amaçlı özel tasarım aksesuardır. Tıbbi, psikolojik, finansal veya manevi sonuç garantisi sunmaz.
+          </div>
+
+          <a href={`https://wa.me/905000000000?text=${whatsappMessage}`} className="mt-6 inline-flex w-full justify-center rounded-full bg-amber-500 px-8 py-4 text-lg font-black text-black hover:bg-amber-400">
+            Sepete Ekle / WhatsApp ile Devam Et - ₺1490
+          </a>
+        </div>
+      </section>
+
+      <section id="sss" className="mx-auto max-w-7xl px-5 py-16">
+        <h2 className="text-4xl font-black">Sık Sorulan Sorular</h2>
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
           {[
-            ["01", "Bilgilerini Gönder", "Ad, anne adı ve doğum tarihi bilgilerini sipariş formuna ekle."],
-            ["02", "Niyetini Seç", "İlişki, bereket veya enerji odağından sana uygun olanı seç."],
-            ["03", "Özel Hazırlansın", "Bilekliğin kişisel hazırlık sürecine alınır."],
-            ["04", "Kutulanıp Gönderilsin", "Özel kutusunda kargoya teslim edilir."],
-          ].map(([no, title, text]) => (
-            <div key={title} className="rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
-              <p className="text-sm font-black text-amber-400">{no}</p>
-              <h3 className="mt-4 text-xl font-black">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-zinc-400">{text}</p>
+            ["Bileklik nasıl hazırlanıyor?", "Sipariş sırasında verilen bilgiler doğrultusunda kişisel hazırlık süreci başlatılır."],
+            ["Sonuç garantisi veriyor musunuz?", "Hayır. Ürün kişisel kullanım ve hediye amaçlı sembolik bir aksesuardır."],
+            ["Kargo süresi nedir?", "Hazırlık sonrası genellikle 1-3 iş günü içinde kargoya verilir."],
+            ["Bilgilerim gizli kalır mı?", "Sipariş bilgileri yalnızca hazırlık ve teslimat süreci için kullanılır."],
+          ].map(([q, a]) => (
+            <div key={q} className="rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
+              <h3 className="text-xl font-black">{q}</h3>
+              <p className="mt-3 text-zinc-400">{a}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section id="quiz" className="container mx-auto px-6 py-16">
-        <div className="rounded-[32px] border border-zinc-800 bg-zinc-950 p-6 md:p-10">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Mini Test</p>
-          <h2 className="mt-4 text-4xl font-black">Sana uygun niyet alanını keşfet.</h2>
-          <p className="mt-4 max-w-3xl text-zinc-400">Bu mini test kesin değerlendirme sunmaz; yalnızca ilgi alanına göre hangi tasarım seçeneğinin sana daha yakın olabileceğini gösterir.</p>
-          <div className="mt-8 grid gap-5 lg:grid-cols-3">
-            <QuizSelect label="Son dönemde en çok hangi konuya odaklanıyorsun?" value={answers.q1} onChange={(v) => updateAnswer("q1", v)} options={["İlişki ve uyum", "İş ve kariyer", "Maddi hedefler", "Enerji ve odak"]} />
-            <QuizSelect label="Kendini daha çok nasıl hissediyorsun?" value={answers.q2} onChange={(v) => updateAnswer("q2", v)} options={["Uyum arıyorum", "Motivasyon arıyorum", "Kendimi düşük hissediyorum", "Yeni başlangıç istiyorum"]} />
-            <QuizSelect label="Bilekliği hangi amaçla düşünüyorsun?" value={answers.q3} onChange={(v) => updateAnswer("q3", v)} options={["Kendim için", "Eş/partner odağıyla", "Hedeflerim için", "Anlamlı hediye olarak"]} />
-          </div>
-          <div className="mt-8 rounded-3xl border border-amber-500/20 bg-amber-500/10 p-6">
-            <p className="text-sm text-amber-200">Önerilen seçenek</p>
-            <h3 className="mt-2 text-2xl font-black">{intents[quizResult].emoji} {intents[quizResult].title}</h3>
-            <p className="mt-2 text-zinc-300">{intents[quizResult].description}</p>
-            <button onClick={() => setIntent(quizResult)} className="mt-5 rounded-full bg-amber-500 px-6 py-3 font-bold text-black hover:bg-amber-400">Bu Niyetle Devam Et</button>
-          </div>
-        </div>
-      </section>
+      <a href="https://wa.me/905000000000" className="fixed bottom-5 right-5 z-50 rounded-full bg-green-500 px-5 py-4 font-black text-black shadow-2xl hover:bg-green-400">
+        Sipariş Öncesi Sor
+      </a>
 
-      <section id="detaylar" className="container mx-auto px-6 py-16">
-        <div className="grid gap-10 lg:grid-cols-2">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Ürün Detayları</p>
-            <h2 className="mt-4 text-4xl font-black">Anlam taşıyan özel tasarım aksesuar.</h2>
-            <p className="mt-5 leading-8 text-zinc-400">MuhurZen bilekliği, bakır malzeme üzerine geleneksel motiflerden ilham alan işleme detaylarıyla hazırlanır. Sipariş sırasında verdiğiniz bilgiler kişisel tasarım süreci için alınır.</p>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              {["Bakır bileklik", "Geleneksel motif işleme", "Kişisel hazırlık süreci", "Özel paketleme"].map((item) => <div key={item} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">✓ {item}</div>)}
-            </div>
-          </div>
-          <Image src="/images/bileklik-2.jpg" alt="Bakır bileklik dış yüzey detayı" width={900} height={900} className="rounded-[32px] border border-zinc-800" />
-        </div>
-      </section>
-
-      <section id="siparis" className="container mx-auto px-6 py-16">
-        <div className="mx-auto max-w-6xl rounded-[32px] border border-zinc-800 bg-zinc-950 p-6 md:p-10">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Sipariş Formu</p>
-          <h2 className="mt-4 text-4xl font-black">Niyetini seç, bilgilerini ekle.</h2>
-
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {(Object.keys(intents) as Intent[]).map((key) => (
-              <button key={key} onClick={() => setIntent(key)} className={`rounded-3xl border p-6 text-left transition ${intent === key ? "border-amber-500 bg-amber-500/10" : "border-zinc-800 bg-black hover:bg-zinc-900"}`}>
-                <p className="text-3xl">{intents[key].emoji}</p>
-                <h3 className="mt-4 text-xl font-black">{intents[key].short}</h3>
-                <p className="mt-3 text-sm leading-6 text-zinc-400">{intents[key].description}</p>
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-8 rounded-3xl border border-zinc-800 bg-black p-6">
-            <h3 className="text-2xl font-black">{selected.emoji} {selected.title}</h3>
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
-              <Input placeholder="Ad Soyad" value={form.name} onChange={(v) => updateForm("name", v)} />
-              <Input placeholder="Anne Adı" value={form.motherName} onChange={(v) => updateForm("motherName", v)} />
-              <Input type="date" value={form.birthDate} onChange={(v) => updateForm("birthDate", v)} />
-            </div>
-
-            {intent === "iliski" && (
-              <div className="mt-6">
-                <p className="mb-4 font-bold text-amber-300">Eş / Partner Bilgileri</p>
-                <div className="grid gap-4 md:grid-cols-3">
-                  <Input placeholder="Eş / Partner Adı" value={form.partnerName} onChange={(v) => updateForm("partnerName", v)} />
-                  <Input placeholder="Eş / Partner Anne Adı (opsiyonel)" value={form.partnerMotherName} onChange={(v) => updateForm("partnerMotherName", v)} />
-                  <Input type="date" value={form.partnerBirthDate} onChange={(v) => updateForm("partnerBirthDate", v)} />
-                </div>
-                <Select className="mt-4" value={form.relationStatus} onChange={(v) => updateForm("relationStatus", v)} options={relationStatuses} />
-              </div>
-            )}
-
-            {intent === "bereket" && <Select className="mt-6" value={form.focus} onChange={(v) => updateForm("focus", v)} options={moneyFocus} />}
-            {intent === "enerji" && <Select className="mt-6" value={form.energyState} onChange={(v) => updateForm("energyState", v)} options={energyFocus} />}
-
-            <textarea value={form.note} onChange={(e) => updateForm("note", e.target.value)} placeholder="Eklemek istediğiniz not..." className="mt-4 min-h-32 w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />
-
-            <div className="mt-6 rounded-2xl bg-amber-500/10 p-5 text-sm leading-6 text-amber-100">Bu ürün dekoratif ve kişisel kullanım amaçlı özel tasarım bir aksesuardır. Tıbbi, psikolojik, finansal veya manevi sonuç garantisi sunmaz.</div>
-
-            <a href={`https://wa.me/905000000000?text=${whatsappMessage}`} className="mt-6 inline-flex w-full justify-center rounded-full bg-amber-500 px-8 py-4 font-black text-black transition hover:bg-amber-400">WhatsApp ile Siparişe Devam Et</a>
-          </div>
-        </div>
-      </section>
-
-      <section id="sss" className="container mx-auto px-6 py-16">
-        <h2 className="text-4xl font-black">Sık Sorulan Sorular</h2>
-        <div className="mt-8 grid gap-5 md:grid-cols-2">
-          {[
-            ["Bileklik nasıl hazırlanıyor?", "Sipariş sırasında verdiğiniz bilgiler doğrultusunda kişisel hazırlık süreci başlatılır."],
-            ["Eş / partner bilgisi zorunlu mu?", "İlişki ve Uyum seçeneğinde partner adı önerilir; anne adı ve doğum tarihi opsiyonel bırakılabilir."],
-            ["Kargo süresi nedir?", "Hazırlık sürecinden sonra genellikle 1-3 iş günü içinde kargoya teslim edilir."],
-            ["Sonuç garantisi veriyor musunuz?", "Hayır. Ürün kişisel kullanım ve hediye amaçlı tasarlanmış sembolik bir aksesuardır."],
-          ].map(([q, a]) => <div key={q} className="rounded-3xl border border-zinc-800 bg-zinc-950 p-6"><h3 className="font-black">{q}</h3><p className="mt-3 leading-7 text-zinc-400">{a}</p></div>)}
-        </div>
-      </section>
-
-      <footer className="border-t border-zinc-900 px-6 py-10 text-center text-sm text-zinc-500">
-        <div className="mb-4 flex flex-wrap justify-center gap-4">
-          <a href="/hakkimizda">Hakkımızda</a><a href="/kvkk">KVKK</a><a href="/gizlilik-politikasi">Gizlilik</a><a href="/mesafeli-satis-sozlesmesi">Mesafeli Satış</a><a href="/iade-politikasi">İade</a><a href="/iletisim">İletişim</a>
+      <footer className="border-t border-zinc-900 px-5 py-10 text-center text-sm text-zinc-500">
+        <div className="mb-4 flex flex-wrap justify-center gap-5">
+          <a href="/hakkimizda">Hakkımızda</a>
+          <a href="/kvkk">KVKK</a>
+          <a href="/gizlilik-politikasi">Gizlilik</a>
+          <a href="/mesafeli-satis-sozlesmesi">Mesafeli Satış</a>
+          <a href="/iade-politikasi">İade Politikası</a>
+          <a href="/iletisim">İletişim</a>
         </div>
         © 2026 MuhurZen. Kişisel kullanım ve hediye amaçlı özel tasarım aksesuar.
       </footer>
     </main>
   );
-}
-
-function Input({ value, onChange, placeholder, type = "text" }: { value: string; onChange: (value: string) => void; placeholder?: string; type?: string }) {
-  return <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />;
-}
-
-function Select({ value, onChange, options, className = "" }: { value: string; onChange: (value: string) => void; options: string[]; className?: string }) {
-  return <select value={value} onChange={(e) => onChange(e.target.value)} className={`w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500 ${className}`}>{options.map((option) => <option key={option}>{option}</option>)}</select>;
-}
-
-function QuizSelect({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: string[] }) {
-  return <label className="grid gap-3"><span className="font-bold">{label}</span><select value={value} onChange={(e) => onChange(e.target.value)} className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500"><option value="">Seçiniz</option>{options.map((option) => <option key={option}>{option}</option>)}</select></label>;
 }

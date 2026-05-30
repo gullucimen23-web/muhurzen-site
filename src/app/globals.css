@@ -3,4 +3,4 @@
 :root { color-scheme: dark; }
 html { scroll-behavior: smooth; }
 body { margin: 0; background: #000; }
-::selection { background: #f59e0b; color: #000; }
+* { box-sizing: border-box; }
