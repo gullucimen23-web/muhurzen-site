@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { db, storage } from "@/lib/firebase";
 
 type Flow = "iliski" | "enerji" | "bereket";
 type Step = "form" | "payment" | "done";
@@ -73,12 +74,26 @@ const initialForm: FormState = {
   note: "",
 };
 
+async function notifyTelegram(payload: Record<string, unknown>) {
+  try {
+    await fetch("/api/telegram", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    // Sipariş akışını Telegram hatası yüzünden durdurmuyoruz.
+  }
+}
+
 export default function Home() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [showResult, setShowResult] = useState(false);
   const [step, setStep] = useState<Step>("form");
   const [orderId, setOrderId] = useState("");
+  const [receiptUrl, setReceiptUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [receiptLoading, setReceiptLoading] = useState(false);
   const [error, setError] = useState("");
 
   const selected = intents[form.intent];
@@ -114,7 +129,7 @@ export default function Home() {
     setError("");
 
     try {
-      const ref = await addDoc(collection(db, "orders"), {
+      const refDoc = await addDoc(collection(db, "orders"), {
         ...form,
         intentTitle: selected.title,
         productName: "MuhurZen Bakır Mühür Bilekliği",
@@ -124,36 +139,75 @@ export default function Home() {
         orderStatus: "odeme_bekliyor",
         paymentMethod: "iban",
         ibanInfo,
+        receiptUrl: "",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
 
-      setOrderId(ref.id);
-
-      await fetch("/api/telegram", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: "new_order",
-          orderId: ref.id,
-          name: form.name,
-          phone: form.phone,
-          city: form.city,
-          intentTitle: selected.title,
-          amount: 1490,
-          paymentStatus: "bekliyor",
-        }),
-      });
-
+      setOrderId(refDoc.id);
       setStep("payment");
       window.location.hash = "odeme";
+
+      await notifyTelegram({
+        type: "new_order",
+        orderId: refDoc.id,
+        name: form.name,
+        phone: form.phone,
+        city: form.city,
+        intentTitle: selected.title,
+        amount: 1490,
+        paymentStatus: "bekliyor",
+        orderStatus: "odeme_bekliyor",
+      });
     } catch (err) {
       console.error(err);
       setError("Sipariş oluşturulamadı. Lütfen tekrar deneyin.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const uploadReceipt = async (file: File) => {
+    if (!orderId) return;
+
+    setReceiptLoading(true);
+    setError("");
+
+    try {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const receiptRef = ref(storage, `receipts/${orderId}/${Date.now()}-${safeName}`);
+      await uploadBytes(receiptRef, file);
+      const url = await getDownloadURL(receiptRef);
+
+      await updateDoc(doc(db, "orders", orderId), {
+        receiptUrl: url,
+        paymentStatus: "odeme_bildirildi",
+        orderStatus: "odeme_kontrol",
+        paidNotifiedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      setReceiptUrl(url);
+
+      await notifyTelegram({
+        type: "receipt_uploaded",
+        orderId,
+        name: form.name,
+        phone: form.phone,
+        city: form.city,
+        intentTitle: selected.title,
+        amount: 1490,
+        paymentStatus: "odeme_bildirildi",
+        orderStatus: "odeme_kontrol",
+      });
+
+      setStep("done");
+      window.location.hash = "tamamlandi";
+    } catch (err) {
+      console.error(err);
+      setError("Dekont yüklenemedi. Lütfen tekrar deneyin veya WhatsApp üzerinden ulaşın.");
+    } finally {
+      setReceiptLoading(false);
     }
   };
 
@@ -171,21 +225,16 @@ export default function Home() {
         updatedAt: serverTimestamp(),
       });
 
-      await fetch("/api/telegram", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: "payment_notified",
-          orderId,
-          name: form.name,
-          phone: form.phone,
-          city: form.city,
-          intentTitle: selected.title,
-          amount: 1490,
-          paymentStatus: "odeme_bildirildi",
-        }),
+      await notifyTelegram({
+        type: "payment_notified",
+        orderId,
+        name: form.name,
+        phone: form.phone,
+        city: form.city,
+        intentTitle: selected.title,
+        amount: 1490,
+        paymentStatus: "odeme_bildirildi",
+        orderStatus: "odeme_kontrol",
       });
 
       setStep("done");
@@ -213,6 +262,7 @@ export default function Home() {
             <a href="#test" className="hover:text-white">Mini Test</a>
             <a href="#hazirlik" className="hover:text-white">Hazırlık</a>
             <a href="#sss" className="hover:text-white">SSS</a>
+            <a href="/takip" className="hover:text-white">Sipariş Takip</a>
             <a href="/admin" className="hover:text-white">Admin</a>
           </nav>
           <a href="#siparis" className="rounded-full bg-amber-500 px-5 py-2 text-sm font-bold text-black hover:bg-amber-400">
@@ -267,7 +317,7 @@ export default function Home() {
 
       <section className="mx-auto max-w-7xl px-5 py-8">
         <div className="grid gap-4 md:grid-cols-4">
-          {["500+ hazırlık talebi", "Türkiye geneli gönderim", "Gizli bilgi işleme", "WhatsApp destek hattı"].map((item) => (
+          {["500+ hazırlık talebi", "Türkiye geneli gönderim", "Gizli bilgi işleme", "Telegram sipariş bildirimi"].map((item) => (
             <div key={item} className="rounded-3xl border border-zinc-800 bg-zinc-950 p-5 font-bold">✓ {item}</div>
           ))}
         </div>
@@ -434,10 +484,32 @@ export default function Home() {
                 <p><b>Tutar:</b> 1490 TL</p>
                 <p><b>Açıklama:</b> MuhurZen {orderId}</p>
               </div>
+
+              <div className="mt-6 rounded-3xl border border-zinc-800 bg-black p-5">
+                <h4 className="text-xl font-black">Dekont Yükle</h4>
+                <p className="mt-2 text-sm text-zinc-400">
+                  Dekont yüklemek zorunlu değildir; yüklerseniz ödeme kontrolü daha hızlı yapılır.
+                </p>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadReceipt(file);
+                  }}
+                  className="mt-4 w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 text-sm"
+                />
+                {receiptUrl && (
+                  <a href={receiptUrl} target="_blank" className="mt-3 inline-flex text-sm font-bold text-amber-300">
+                    Yüklenen dekontu görüntüle
+                  </a>
+                )}
+              </div>
+
               <p className="mt-5 text-sm leading-6 text-zinc-300">Ödeme açıklamasına sipariş numaranı yaz. Ödemeden sonra aşağıdaki butona bas; siparişin ödeme kontrol listesine düşer.</p>
               {error && <div className="mt-5 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">{error}</div>}
-              <button disabled={loading} onClick={notifyPaid} className="mt-6 w-full rounded-full bg-amber-500 px-8 py-4 text-lg font-black text-black hover:bg-amber-400 disabled:opacity-60">
-                {loading ? "Bildirim alınıyor..." : "Ödemeyi Yaptım"}
+              <button disabled={loading || receiptLoading} onClick={notifyPaid} className="mt-6 w-full rounded-full bg-amber-500 px-8 py-4 text-lg font-black text-black hover:bg-amber-400 disabled:opacity-60">
+                {loading || receiptLoading ? "İşlem alınıyor..." : "Ödemeyi Yaptım"}
               </button>
               <a href={`https://wa.me/905000000000?text=${whatsappMessage}`} className="mt-4 inline-flex w-full justify-center rounded-full border border-zinc-700 px-8 py-4 font-black hover:bg-zinc-900">
                 WhatsApp Destek
@@ -451,6 +523,12 @@ export default function Home() {
               <h3 className="mt-3 text-3xl font-black">Teşekkürler, siparişin kontrol listesine düştü.</h3>
               <p className="mt-3 text-zinc-300">Sipariş No: <b>{orderId}</b></p>
               <p className="mt-4 text-zinc-300">Ödeme kontrolünden sonra hazırlık süreci başlatılacaktır.</p>
+              <div className="mt-5 rounded-2xl bg-black p-4 text-sm text-zinc-300">
+                Siparişini takip etmek için bu numarayı sakla: <b>{orderId}</b>
+              </div>
+              <a href={`/takip?orderId=${orderId}`} className="mt-6 mr-3 inline-flex rounded-full bg-amber-500 px-8 py-4 font-black text-black hover:bg-amber-400">
+                Siparişimi Takip Et
+              </a>
               <a href={`https://wa.me/905000000000?text=${whatsappMessage}`} className="mt-6 inline-flex rounded-full bg-green-500 px-8 py-4 font-black text-black hover:bg-green-400">
                 WhatsApp Destek
               </a>

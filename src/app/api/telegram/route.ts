@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 type TelegramPayload = {
-  type?: "new_order" | "payment_notified";
+  type?: "new_order" | "payment_notified" | "receipt_uploaded" | "status_changed";
   orderId?: string;
   name?: string;
   phone?: string;
@@ -9,22 +9,31 @@ type TelegramPayload = {
   intentTitle?: string;
   amount?: number;
   paymentStatus?: string;
+  orderStatus?: string;
 };
 
 function buildMessage(body: TelegramPayload) {
-  const title =
-    body.type === "payment_notified"
-      ? "💸 MuhurZen Ödeme Bildirimi"
-      : "🔥 Yeni MuhurZen Siparişi";
+  const titles = {
+    new_order: "🔥 Yeni MuhurZen Siparişi",
+    payment_notified: "💸 MuhurZen Ödeme Bildirimi",
+    receipt_uploaded: "🧾 MuhurZen Dekont Yüklendi",
+    status_changed: "📦 MuhurZen Sipariş Durumu Güncellendi",
+  };
 
-  const paymentText =
+  const title = titles[body.type || "new_order"] || titles.new_order;
+
+  const helper =
     body.type === "payment_notified"
       ? "Müşteri ödeme yaptığını bildirdi. Banka hesabından kontrol et."
-      : "Yeni sipariş oluşturuldu. Ödeme bekleniyor.";
+      : body.type === "receipt_uploaded"
+        ? "Müşteri dekont yükledi. Admin panelden kontrol edebilirsin."
+        : body.type === "status_changed"
+          ? "Sipariş durumu güncellendi."
+          : "Yeni sipariş oluşturuldu. Ödeme bekleniyor.";
 
   return `${title}
 
-${paymentText}
+${helper}
 
 Sipariş No:
 ${body.orderId || "-"}
@@ -36,6 +45,7 @@ Telefon: ${body.phone || "-"}
 Niyet: ${body.intentTitle || "-"}
 Tutar: ${body.amount || 1490} TL
 Ödeme Durumu: ${body.paymentStatus || "-"}
+Sipariş Durumu: ${body.orderStatus || "-"}
 
 Admin Panel:
 https://muhurzen.com/admin`;
@@ -60,9 +70,7 @@ export async function POST(req: Request) {
       `https://api.telegram.org/bot${token}/sendMessage`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
           text,
@@ -73,10 +81,7 @@ export async function POST(req: Request) {
 
     if (!telegramResponse.ok) {
       const errorText = await telegramResponse.text();
-      return NextResponse.json(
-        { success: false, error: errorText },
-        { status: 500 }
-      );
+      return NextResponse.json({ success: false, error: errorText }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
