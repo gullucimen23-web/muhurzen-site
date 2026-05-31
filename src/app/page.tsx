@@ -529,7 +529,63 @@ export default function Home() {
           )}
         </div>
       </section>
+        <section className="mx-auto max-w-7xl px-5 py-16">
+  <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950 p-6 md:p-10">
+    <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">
+      MühürZen Rehberi
+    </p>
 
+    <h2 className="mt-3 text-4xl font-black">
+      Süleyman Mührü ve Bakır Bileklik Rehberi
+    </h2>
+
+    <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+
+      <a href="/suleyman-muhru" className="rounded-3xl border border-zinc-800 bg-black p-5 hover:border-amber-500">
+        <h3 className="text-xl font-black">Süleyman Mührü</h3>
+        <p className="mt-2 text-zinc-400">
+          Süleyman Mührünün anlamı, tarihi ve sembolik kullanımı.
+        </p>
+      </a>
+
+      <a href="/suleyman-muhru-bileklik" className="rounded-3xl border border-zinc-800 bg-black p-5 hover:border-amber-500">
+        <h3 className="text-xl font-black">Süleyman Mührü Bileklik</h3>
+        <p className="mt-2 text-zinc-400">
+          Süleyman Mührü işlenen özel bileklik modelleri.
+        </p>
+      </a>
+
+      <a href="/bakir-suleyman-muhru-bileklik" className="rounded-3xl border border-zinc-800 bg-black p-5 hover:border-amber-500">
+        <h3 className="text-xl font-black">Bakır Süleyman Mührü Bileklik</h3>
+        <p className="mt-2 text-zinc-400">
+          Bakır üzerine işlenen Süleyman Mührü tasarımları.
+        </p>
+      </a>
+
+      <a href="/bakir-bileklik-faydalari" className="rounded-3xl border border-zinc-800 bg-black p-5 hover:border-amber-500">
+        <h3 className="text-xl font-black">Bakır Bileklik Faydaları</h3>
+        <p className="mt-2 text-zinc-400">
+          Bakır bileklik hakkında merak edilenler.
+        </p>
+      </a>
+
+      <a href="/isim-yazili-bakir-bileklik" className="rounded-3xl border border-zinc-800 bg-black p-5 hover:border-amber-500">
+        <h3 className="text-xl font-black">İsim Yazılı Bakır Bileklik</h3>
+        <p className="mt-2 text-zinc-400">
+          Kişiye özel isim yazılı tasarımlar.
+        </p>
+      </a>
+
+      <a href="/kisiye-ozel-bakir-bileklik" className="rounded-3xl border border-zinc-800 bg-black p-5 hover:border-amber-500">
+        <h3 className="text-xl font-black">Kişiye Özel Bakır Bileklik</h3>
+        <p className="mt-2 text-zinc-400">
+          Tamamen kişiye özel hazırlanan bileklikler.
+        </p>
+      </a>
+
+    </div>
+  </div>
+</section>
       <section id="sss" className="mx-auto max-w-7xl px-5 py-16">
         <h2 className="text-4xl font-black">Sık Sorulan Sorular</h2>
         <div className="mt-8 grid gap-4 md:grid-cols-2">
