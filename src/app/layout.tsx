@@ -3,16 +3,32 @@ import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MuhurZen | Kişiye Özel Bakır Mühür Bilekliği",
-  description: "Kişiye özel hazırlanan bakır mühür bileklikleri. Geleneksel sembollerden ilham alan özel tasarım aksesuar.",
+  metadataBase: new URL("https://mühürzen.com"),
+  title: "MühürZen | Kişiye Özel Bakır Mühür Bilekliği",
+  description:
+    "Kişiye özel hazırlanan bakır mühür bileklikleri. Geleneksel sembollerden ilham alan özel tasarım aksesuar.",
   openGraph: {
-    title: "MuhurZen | Kişiye Özel Bakır Mühür Bilekliği",
-    description: "Ad ve doğum bilgilerine göre kişisel anlam taşıyacak şekilde hazırlanan özel tasarım bakır aksesuar.",
-    url: "https://muhurzen.com",
-    siteName: "MuhurZen",
-    images: [{ url: "/images/bileklik-1.jpg", width: 1200, height: 1200 }],
+    title: "MühürZen | Kişiye Özel Bakır Mühür Bilekliği",
+    description:
+      "Ad ve doğum bilgilerine göre kişisel anlam taşıyacak şekilde hazırlanan özel tasarım bakır aksesuar.",
+    url: "https://mühürzen.com",
+    siteName: "MühürZen",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "MühürZen kişiye özel bakır mühür bilekliği",
+      },
+    ],
     locale: "tr_TR",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MühürZen | Kişiye Özel Bakır Mühür Bilekliği",
+    description: "Kişiye özel hazırlanan bakır mühür bileklikleri.",
+    images: ["/og-image.png"],
   },
 };
 
