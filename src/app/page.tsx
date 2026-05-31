@@ -385,7 +385,7 @@ export default function Home() {
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             {[
-              "İsim + anne adı + doğum tarihi alınır",
+              "Kişiye özel hazırlık bilgileri alınır",
               "Maddi veya manevi niyetiniz değerlendirilir",
               "İlişki niyetinde iki kişinin bilgisi alınır",
               "Özel kutu ve sipariş takip sistemi",
@@ -443,6 +443,85 @@ export default function Home() {
           {["Kişiye özel hazırlık", "Türkiye geneli gönderim", "Gizli bilgi işleme", "Canlı destek"].map((item) => (
             <div key={item} className="rounded-3xl border border-zinc-800 bg-zinc-950 p-5 font-bold">✓ {item}</div>
           ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-5 py-16">
+        <div className="rounded-[2rem] border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-zinc-950 p-6 md:p-10">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">
+            Her Mühür Aynı Değildir
+          </p>
+
+          <h2 className="mt-3 text-4xl font-black">
+            Sadece bir bileklik değil, kişiye özel hazırlık süreci.
+          </h2>
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="space-y-5 text-base leading-8 text-zinc-300">
+              <p>
+                Geçmişten günümüze birçok gelenekte kişinin adı, anne adı,
+                doğum tarihi ve niyeti birlikte değerlendirilirdi. Kişiye özel
+                hazırlanan çalışmaların temelinde, kişinin kendi bilgileri ve
+                taşıdığı niyet yer alırdı.
+              </p>
+
+              <p>
+                Bugün piyasada Süleyman Mührü sembolünü taşıyan birçok ürün
+                bulabilirsiniz. Ancak MühürZen'de amaç yalnızca bir sembolü
+                taşımak değildir.
+              </p>
+
+              <p>
+                Her sipariş; ad, anne adı, doğum tarihi ve ilettiğiniz niyet
+                doğrultusunda özel hazırlık sürecine alınır. İlişki niyetlerinde
+                ise iki kişinin bilgileri birlikte değerlendirilir.
+              </p>
+
+              <p className="font-semibold text-amber-100">
+                Belki de ihtiyacınız olan şey sıradan bir aksesuar değil;
+                sizin niyetiniz ve hikayeniz doğrultusunda hazırlanmış kişisel
+                bir çalışmadır.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-zinc-800 bg-black p-5">
+              <h3 className="text-2xl font-black">Neden farklı?</h3>
+              <div className="mt-5 grid gap-3 text-sm text-zinc-300">
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+                  ✓ Seri üretim değil, kişiye özel hazırlık
+                </div>
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+                  ✓ İsim, doğum tarihi ve niyet birlikte ele alınır
+                </div>
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+                  ✓ İlişki niyetinde iki kişinin bilgileri değerlendirilir
+                </div>
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+                  ✓ Özel kutu ve sipariş takip sistemiyle gönderilir
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {[
+              ["Kişiye Özel", "Her çalışma kişiye özel bilgiler doğrultusunda hazırlanır."],
+              ["Özel Hazırlık", "Sembol, niyet ve kişisel bilgiler aynı süreçte değerlendirilir."],
+              ["Anlamlı Hediye", "Kendiniz veya sevdikleriniz için sıradan olmayan bir aksesuar."],
+            ].map(([title, desc]) => (
+              <div key={title} className="rounded-3xl border border-zinc-800 bg-black p-5">
+                <h3 className="text-xl font-black">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-zinc-400">{desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <a
+            href="#siparis"
+            className="mt-8 inline-flex rounded-full bg-amber-500 px-8 py-4 font-black text-black hover:bg-amber-400"
+          >
+            Çalışmamı Başlat
+          </a>
         </div>
       </section>
 
@@ -715,9 +794,9 @@ export default function Home() {
 
           <div className="grid gap-4 md:grid-cols-3">
             {[
-              ["★★★★★", "Beklediğimden kaliteli geldi. Paketleme de çok özenliydi."],
-              ["★★★★★", "İsim ve sembol detayı çok hoş duruyor. Hediye olarak aldım."],
-              ["★★★★★", "Sipariş süreci kolaydı, takip ekranı güzel düşünülmüş."],
+              ["★★★★★", "Eşime hediye aldım. Kutulaması ve işçiliği çok güzeldi."],
+              ["★★★★★", "Siparişten birkaç gün sonra elime ulaştı. Beklediğimden daha kaliteli."],
+              ["★★★★★", "Kişiye özel hazırlanması hoşuma gitti. Çok şık duruyor."],
             ].map(([stars, text]) => (
               <div key={text} className="rounded-3xl border border-zinc-800 bg-zinc-950 p-5">
                 <p className="text-amber-400">{stars}</p>
