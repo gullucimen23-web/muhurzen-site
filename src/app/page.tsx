@@ -247,12 +247,82 @@ export default function Home() {
     }
   };
 
-  const whatsappMessage = encodeURIComponent(
-    `MuhurZen sipariş destek talebi\n\nSipariş No: ${orderId || "-"}\nNiyet: ${selected.title}\nAd Soyad: ${form.name}\nTelefon: ${form.phone}\nÜrün: MuhurZen Bakır Mühür Bilekliği\nFiyat: 1490 TL`
-  );
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: "MuhurZen Bakır Mühür Bilekliği",
+    image: ["https://muhurzen.com/images/bileklik-1.jpg"],
+    description:
+      "İsme özel hazırlanan bakır mühür bilekliği. Süleyman Mührü işlenebilen kişiye özel tasarım bakır aksesuar.",
+    brand: {
+      "@type": "Brand",
+      name: "MuhurZen",
+    },
+    offers: {
+      "@type": "Offer",
+      url: "https://muhurzen.com",
+      priceCurrency: "TRY",
+      price: "1490",
+      availability: "https://schema.org/InStock",
+    },
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "Bileklik nasıl hazırlanıyor?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Sipariş sırasında verilen bilgiler doğrultusunda kişisel hazırlık süreci başlatılır.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Sonuç garantisi veriyor musunuz?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Hayır. Ürün kişisel kullanım ve hediye amaçlı sembolik bir aksesuardır.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Kargo süresi nedir?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Hazırlık sonrası genellikle 1-3 iş günü içinde kargoya verilir.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Bilgilerim gizli kalır mı?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Sipariş bilgileri yalnızca hazırlık ve teslimat süreci için kullanılır.",
+        },
+      },
+    ],
+  };
 
   return (
     <main className="min-h-screen bg-black text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productSchema),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqSchema),
+        }}
+      />
+
       <header className="sticky top-0 z-50 border-b border-zinc-900 bg-black/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <a href="#" className="text-xl font-black tracking-tight">
