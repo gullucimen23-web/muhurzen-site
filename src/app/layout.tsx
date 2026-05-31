@@ -21,6 +21,23 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="tr">
       <body>
         {children}
+        <Script
+  src="https://www.googletagmanager.com/gtag/js?id=G-MHL4JKNG6T"
+  strategy="afterInteractive"
+/>
+
+<Script
+  id="ga-script"
+  strategy="afterInteractive"
+  dangerouslySetInnerHTML={{
+    __html: `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MHL4JKNG6T');
+    `,
+  }}
+/>
         <Script id="tawk-live-chat" strategy="afterInteractive">
           {`
             var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
