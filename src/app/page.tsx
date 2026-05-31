@@ -511,9 +511,6 @@ export default function Home() {
               <button disabled={loading || receiptLoading} onClick={notifyPaid} className="mt-6 w-full rounded-full bg-amber-500 px-8 py-4 text-lg font-black text-black hover:bg-amber-400 disabled:opacity-60">
                 {loading || receiptLoading ? "İşlem alınıyor..." : "Ödemeyi Yaptım"}
               </button>
-              <a href={`https://wa.me/905000000000?text=${whatsappMessage}`} className="mt-4 inline-flex w-full justify-center rounded-full border border-zinc-700 px-8 py-4 font-black hover:bg-zinc-900">
-                WhatsApp Destek
-              </a>
             </div>
           )}
 
@@ -528,9 +525,6 @@ export default function Home() {
               </div>
               <a href={`/takip?orderId=${orderId}`} className="mt-6 mr-3 inline-flex rounded-full bg-amber-500 px-8 py-4 font-black text-black hover:bg-amber-400">
                 Siparişimi Takip Et
-              </a>
-              <a href={`https://wa.me/905000000000?text=${whatsappMessage}`} className="mt-6 inline-flex rounded-full bg-green-500 px-8 py-4 font-black text-black hover:bg-green-400">
-                WhatsApp Destek
               </a>
             </div>
           )}
@@ -554,9 +548,6 @@ export default function Home() {
         </div>
       </section>
 
-      <a href="https://wa.me/905000000000" className="fixed bottom-5 right-5 z-50 rounded-full bg-green-500 px-5 py-4 font-black text-black shadow-2xl hover:bg-green-400">
-        Sipariş Öncesi Sor
-      </a>
 
       <footer className="border-t border-zinc-900 px-5 py-10 text-center text-sm text-zinc-500">
         <div className="mb-4 flex flex-wrap justify-center gap-5">
