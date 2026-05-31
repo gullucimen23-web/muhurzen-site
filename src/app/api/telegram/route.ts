@@ -48,7 +48,7 @@ Tutar: ${body.amount || 1490} TL
 Sipariş Durumu: ${body.orderStatus || "-"}
 
 Admin Panel:
-https://muhurzen.com/admin`;
+https://mühürzen.com/admin`;
 }
 
 export async function POST(req: Request) {
