@@ -7,7 +7,7 @@ import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/fi
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
 
-type Flow = "iliski" | "enerji" | "bereket";
+type Flow = "iliski" | "manevi" | "maddi";
 type Step = "form" | "payment" | "done";
 
 type FormState = {
@@ -42,22 +42,22 @@ const intents = {
     title: "İlişki ve Uyum Niyeti",
     desc: "İlişkilerinde uyum, anlayış ve bağ hissine odaklanmak isteyenler için kişisel hazırlık seçeneği.",
   },
-  enerji: {
-    label: "Enerji & Odak",
-    eyebrow: "Mini test",
-    title: "Enerji ve Odak Niyeti",
-    desc: "Son dönemde kendini yorgun, dağınık veya motivasyonsuz hissedenler için kişisel anlam taşıyan tasarım.",
+  manevi: {
+    label: "Manevi Niyet",
+    eyebrow: "Kişisel niyet",
+    title: "Manevi Niyet Çalışması",
+    desc: "Korunma, huzur, bağ, içsel denge ve kişisel anlam odağında hazırlanan özel tasarım.",
   },
-  bereket: {
-    label: "Bereket & Motivasyon",
-    eyebrow: "Hedef niyeti",
-    title: "Bereket ve Motivasyon Niyeti",
-    desc: "İş, kariyer, hedef ve yaşam motivasyonuna odaklanan kişisel tasarım seçeneği.",
+  maddi: {
+    label: "Maddi Niyet",
+    eyebrow: "Bereket & hedef",
+    title: "Maddi Niyet Çalışması",
+    desc: "İş, kariyer, bereket, kazanç ve yeni başlangıçlara odaklanan kişisel tasarım.",
   },
 };
 
 const initialForm: FormState = {
-  intent: "iliski",
+  intent: "manevi",
   name: "",
   motherName: "",
   birthDate: "",
@@ -101,12 +101,12 @@ export default function Home() {
 
   const resultText = useMemo(() => {
     if (form.intent === "iliski") {
-      return "Yanıtlarınıza göre İlişki & Uyum niyeti sizin talebinize daha yakın görünüyor. Bu seçenek, kişiye özel bilgiler ve partner bilgileriyle hazırlık sürecine alınır.";
+      return "İlişki ve uyum niyetinde iki kişinin ad, anne adı ve doğum tarihi birlikte değerlendirilerek kişiye özel hazırlık süreci başlatılır.";
     }
-    if (form.intent === "enerji") {
-      return "Yanıtlarınıza göre Enerji & Odak niyeti sizin talebinize daha yakın görünüyor. Bu seçenek, günlük motivasyon, odak ve kişisel denge hissine yönelik sembolik bir aksesuar olarak hazırlanır.";
+    if (form.intent === "manevi") {
+      return "Manevi niyetiniz; ad, anne adı, doğum tarihi ve yazdığınız niyet doğrultusunda özel hazırlık sürecine alınır.";
     }
-    return "Yanıtlarınıza göre Bereket & Motivasyon niyeti sizin talebinize daha yakın görünüyor. Bu seçenek, hedefler, iş hayatı ve yeni başlangıçlara odaklanan kişisel tasarım olarak hazırlanır.";
+    return "Maddi niyetiniz; iş, bereket, kazanç veya hedef odağınıza göre kişisel hazırlık sürecine alınır.";
   }, [form.intent]);
 
   const update = (key: keyof FormState, value: string) => {
@@ -121,8 +121,11 @@ export default function Home() {
       return;
     }
 
-    if (form.intent === "iliski" && !form.partnerName) {
-      setError("İlişki & Uyum niyeti için partner adını ekleyin.");
+    if (
+      form.intent === "iliski" &&
+      (!form.partnerName || !form.partnerMotherName || !form.partnerBirthDate || !form.relationshipStatus)
+    ) {
+      setError("İlişki & Uyum niyeti için ikinci kişinin ad soyad, anne adı, doğum tarihi ve ilişki durumunu ekleyin.");
       return;
     }
 
@@ -133,8 +136,8 @@ export default function Home() {
       const refDoc = await addDoc(collection(db, "orders"), {
         ...form,
         intentTitle: selected.title,
-        productName: "MuhurZen Bakır Mühür Bilekliği",
-        amount: 1490,
+        productName: "MühürZen Bakır Mühür Bilekliği",
+        amount: 1990,
         currency: "TRY",
         paymentStatus: "bekliyor",
         orderStatus: "odeme_bekliyor",
@@ -156,7 +159,7 @@ export default function Home() {
         phone: form.phone,
         city: form.city,
         intentTitle: selected.title,
-        amount: 1490,
+        amount: 1990,
         paymentStatus: "bekliyor",
         orderStatus: "odeme_bekliyor",
       });
@@ -197,7 +200,7 @@ export default function Home() {
         phone: form.phone,
         city: form.city,
         intentTitle: selected.title,
-        amount: 1490,
+        amount: 1990,
         paymentStatus: "odeme_bildirildi",
         orderStatus: "odeme_kontrol",
       });
@@ -233,7 +236,7 @@ export default function Home() {
         phone: form.phone,
         city: form.city,
         intentTitle: selected.title,
-        amount: 1490,
+        amount: 1990,
         paymentStatus: "odeme_bildirildi",
         orderStatus: "odeme_kontrol",
       });
@@ -264,7 +267,7 @@ export default function Home() {
       "@type": "Offer",
       url: "https://mühürzen.com",
       priceCurrency: "TRY",
-      price: "1490",
+      price: "1990",
       availability: "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
     },
@@ -351,58 +354,84 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b border-zinc-900 bg-black/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <a href="#" className="text-xl font-black tracking-tight">
-            Muhur<span className="text-amber-400">Zen</span>
+            Mühür<span className="text-amber-400">Zen</span>
           </a>
           <nav className="hidden items-center gap-6 text-sm text-zinc-300 md:flex">
-            <a href="#test" className="hover:text-white">Mini Test</a>
-            <a href="#hazirlik" className="hover:text-white">Hazırlık</a>
+            <a href="#hazirlik" className="hover:text-white">Süreç</a>
+            <a href="#siparis" className="hover:text-white">Sipariş</a>
             <a href="#sss" className="hover:text-white">SSS</a>
             <a href="/takip" className="hover:text-white">Sipariş Takip</a>
           </nav>
           <a href="#siparis" className="rounded-full bg-amber-500 px-5 py-2 text-sm font-bold text-black hover:bg-amber-400">
-            Bilekliğini Oluştur
+            Çalışmamı Başlat
           </a>
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 lg:grid-cols-2 lg:py-24">
-        <div>
-          <div className="inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-300">
-            MuhurZen® kişiye özel hazırlık
+      <section className="mx-auto grid max-w-7xl items-center gap-8 px-5 pb-10 pt-8 lg:grid-cols-2 lg:py-20">
+        <div className="order-2 lg:order-1">
+          <div className="inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-amber-300">
+            Seri üretim değil • Kişiye özel hazırlık
           </div>
-          <h1 className="mt-7 text-5xl font-black leading-[0.95] tracking-tight md:text-7xl">
-            İsme Özel Hazırlanan Bakır Mühür Bilekliği
+
+          <h1 className="mt-5 text-4xl font-black leading-[0.95] tracking-tight sm:text-5xl md:text-7xl">
+            İsminiz ve niyetinizle hazırlanan bakır mühür bileklik
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-8 text-zinc-300">
-            Geleneksel sembollerden ilham alan, ad ve doğum bilgilerine göre kişisel anlam taşıyacak şekilde hazırlanan özel tasarım bakır aksesuar.
+
+          <p className="mt-5 max-w-xl text-base leading-7 text-zinc-300 sm:text-lg sm:leading-8">
+            Siparişiniz; <b>ad soyad, anne adı, doğum tarihi</b> ve paylaştığınız
+            <b> maddi / manevi niyet</b> doğrultusunda değerlendirilir. İlişki niyetinde iki kişinin bilgileri birlikte alınır.
           </p>
-          <div className="mt-7 grid gap-3 sm:grid-cols-2">
-            {["Kişiye özel hazırlanır", "Partner bilgisi eklenebilir", "Özel kutu ile gönderilir", "Ücretsiz kargo seçeneği"].map((item) => (
-              <div key={item} className="rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-200">✓ {item}</div>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {[
+              "İsim + anne adı + doğum tarihi alınır",
+              "Maddi veya manevi niyetiniz değerlendirilir",
+              "İlişki niyetinde iki kişinin bilgisi alınır",
+              "Özel kutu ve sipariş takip sistemi",
+            ].map((item) => (
+              <div key={item} className="rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-200">
+                ✓ {item}
+              </div>
             ))}
           </div>
-          <div className="mt-9 flex flex-wrap gap-4">
-            <a href="#test" className="rounded-full bg-amber-500 px-8 py-4 font-black text-black hover:bg-amber-400">Sana Uygun Niyeti Bul</a>
-            <a href="#siparis" className="rounded-full border border-zinc-700 px-8 py-4 font-bold hover:bg-zinc-900">Sipariş Formu</a>
+
+          <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
+            <a href="#siparis" className="rounded-full bg-amber-500 px-8 py-4 text-center font-black text-black hover:bg-amber-400">
+              Çalışmamı Başlat
+            </a>
+            <a href="#hazirlik" className="rounded-full border border-zinc-700 px-8 py-4 text-center font-bold hover:bg-zinc-900">
+              Süreç Nasıl İşliyor?
+            </a>
           </div>
-          <div className="mt-7 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-100">
-            Bugün özel hazırlık kontenjanı: <b>7 / 15</b> sipariş kaldı.
+
+          <div className="mt-5 rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4 text-sm leading-6 text-amber-50">
+            <b>Gizlilik notu:</b> Paylaştığınız bilgiler yalnızca kişiye özel hazırlık, sipariş ve teslimat süreci için kullanılır.
           </div>
         </div>
 
-        <div className="relative">
-          <div className="absolute inset-0 rounded-full bg-amber-500/20 blur-3xl" />
-          <div className="relative overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 p-5 shadow-2xl">
-            <Image src="/images/bileklik-1.jpg" alt="MuhurZen bakır mühür bilekliği" width={900} height={900} className="rounded-[1.5rem]" priority />
-            <div className="mt-5 flex items-end justify-between gap-4">
-              <div>
-                <p className="text-sm text-zinc-400">Özel hazırlık dahil</p>
-                <h2 className="text-2xl font-black">MuhurZen Bilekliği</h2>
-                <p className="mt-1 text-xs text-zinc-500">Özel kutu + ücretsiz kargo seçeneği</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-zinc-400 line-through">₺1990</p>
-                <p className="text-3xl font-black text-amber-400">₺1490</p>
+        <div className="order-1 lg:order-2">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-amber-500/20 blur-3xl" />
+            <div className="relative overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 p-4 shadow-2xl">
+              <Image
+                src="/images/bileklik-1.jpg"
+                alt="MühürZen kişiye özel bakır mühür bilekliği"
+                width={900}
+                height={900}
+                className="rounded-[1.5rem]"
+                priority
+              />
+              <div className="mt-4 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-xs text-zinc-400">Kişiye özel hazırlık dahil</p>
+                  <h2 className="text-xl font-black sm:text-2xl">MühürZen Bilekliği</h2>
+                  <p className="mt-1 text-xs text-zinc-500">İsim • Anne adı • Doğum tarihi • Niyet</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-zinc-400 line-through">₺2990</p>
+                  <p className="text-3xl font-black text-amber-400">₺1990</p>
+                </div>
               </div>
             </div>
           </div>
@@ -411,7 +440,7 @@ export default function Home() {
 
       <section className="mx-auto max-w-7xl px-5 py-8">
         <div className="grid gap-4 md:grid-cols-4">
-          {["500+ hazırlık talebi", "Türkiye geneli gönderim", "Gizli bilgi işleme", "Telegram sipariş bildirimi"].map((item) => (
+          {["Kişiye özel hazırlık", "Türkiye geneli gönderim", "Gizli bilgi işleme", "Canlı destek"].map((item) => (
             <div key={item} className="rounded-3xl border border-zinc-800 bg-zinc-950 p-5 font-bold">✓ {item}</div>
           ))}
         </div>
@@ -419,9 +448,9 @@ export default function Home() {
 
       <section id="test" className="mx-auto max-w-7xl px-5 py-16">
         <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950 p-6 md:p-10">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Mini Test</p>
-          <h2 className="mt-3 text-4xl font-black">Sana uygun niyet alanını keşfet.</h2>
-          <p className="mt-4 max-w-2xl text-zinc-400">Bu test kesin bir tespit sunmaz; verdiğiniz yanıtlara göre size en yakın kişisel tasarım seçeneğini önerir.</p>
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Niyet Alanı</p>
+          <h2 className="mt-3 text-4xl font-black">Niyet alanınızı seçin.</h2>
+          <p className="mt-4 max-w-2xl text-zinc-400">Bilekliğiniz, seçtiğiniz alan ve yazdığınız niyet doğrultusunda kişiye özel hazırlık sürecine alınır.</p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {Object.entries(intents).map(([key, item]) => (
@@ -473,7 +502,7 @@ export default function Home() {
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Nasıl Hazırlanıyor?</p>
             <h2 className="mt-3 text-4xl font-black">Seri üretim değil, kişiye özel hazırlık.</h2>
             <div className="mt-8 grid gap-4">
-              {["Bilgilerini ve niyet alanını gönderirsin.", "Hazırlık süreci kişisel bilgilerle başlatılır.", "Bileklik özel kutusunda paketlenir.", "Kargo bilgisi sipariş takip ekranı üzerinden paylaşılır."].map((item, i) => (
+              {["Ad, anne adı ve doğum tarihin alınır.", "Maddi veya manevi niyetin değerlendirilir.", "İlişki niyetinde iki kişinin bilgileri birlikte alınır.", "Özel kutu ile hazırlanır ve takip bilgisi paylaşılır."].map((item, i) => (
                 <div key={item} className="flex gap-4 rounded-3xl border border-zinc-800 bg-zinc-950 p-5">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500 font-black text-black">{i + 1}</div>
                   <p className="pt-2 text-zinc-300">{item}</p>
@@ -481,17 +510,24 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <Image src="/images/bileklik-2.jpg" alt="MuhurZen bileklik dış yüzey detayı" width={900} height={900} className="rounded-[2rem] border border-zinc-800 object-cover" />
+          <Image src="/images/bileklik-2.jpg" alt="MühürZen bileklik dış yüzey detayı" width={900} height={900} className="rounded-[2rem] border border-zinc-800 object-cover" />
         </div>
       </section>
 
       <section id="siparis" className="mx-auto max-w-7xl px-5 py-16">
         <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950 p-6 md:p-10">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Sipariş Formu</p>
-          <h2 className="mt-3 text-4xl font-black">Bilgilerini ekle, hazırlık talebini oluştur.</h2>
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Kişiye Özel Hazırlık Formu</p>
+          <h2 className="mt-3 text-3xl font-black sm:text-4xl">Bilgilerinizi girin, çalışmanızı başlatalım.</h2>
+          <p className="mt-4 max-w-3xl leading-7 text-zinc-400">Ad soyad, anne adı, doğum tarihi ve niyet alanınız kişiye özel hazırlık sürecinde değerlendirilir.</p>
 
           {step === "form" && (
             <>
+              <div className="mt-8 grid gap-3 rounded-3xl border border-amber-500/20 bg-black p-4 text-sm text-zinc-300 sm:grid-cols-3">
+                <div><b className="text-amber-400">1.</b> Bilgilerini gir</div>
+                <div><b className="text-amber-400">2.</b> Niyetini yaz</div>
+                <div><b className="text-amber-400">3.</b> Ödeme bildir</div>
+              </div>
+
               <div className="mt-8 grid gap-4 md:grid-cols-3">
                 {Object.entries(intents).map(([key, item]) => (
                   <button key={key} onClick={() => update("intent", key as Flow)} className={`rounded-3xl border p-5 text-left ${form.intent === key ? "border-amber-500 bg-amber-500/10" : "border-zinc-800 bg-black"}`}>
@@ -512,10 +548,10 @@ export default function Home() {
 
               {form.intent === "iliski" && (
                 <div className="mt-6 rounded-3xl border border-zinc-800 bg-black p-5">
-                  <h3 className="text-xl font-black">Eş / Partner Bilgileri</h3>
+                  <h3 className="text-xl font-black">İkinci Kişi Bilgileri</h3>
                   <div className="mt-4 grid gap-4 md:grid-cols-3">
-                    <input value={form.partnerName} onChange={(e) => update("partnerName", e.target.value)} placeholder="Partner Adı" className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />
-                    <input value={form.partnerMotherName} onChange={(e) => update("partnerMotherName", e.target.value)} placeholder="Partner Anne Adı" className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />
+                    <input value={form.partnerName} onChange={(e) => update("partnerName", e.target.value)} placeholder="İkinci Kişi Ad Soyad" className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />
+                    <input value={form.partnerMotherName} onChange={(e) => update("partnerMotherName", e.target.value)} placeholder="İkinci Kişi Anne Adı" className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />
                     <input value={form.partnerBirthDate} onChange={(e) => update("partnerBirthDate", e.target.value)} type="date" className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />
                   </div>
                   <select value={form.relationshipStatus} onChange={(e) => update("relationshipStatus", e.target.value)} className="mt-4 w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500">
@@ -529,26 +565,27 @@ export default function Home() {
                 </div>
               )}
 
-              {(form.intent === "bereket" || form.intent === "enerji") && (
+              {(form.intent === "maddi" || form.intent === "manevi") && (
                 <select value={form.focusArea} onChange={(e) => update("focusArea", e.target.value)} className="mt-6 w-full rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500">
-                  <option value="">Odak Alanı Seç</option>
-                  <option>İş hayatı</option>
-                  <option>Kariyer</option>
+                  <option value="">Niyet Alanı Seç</option>
+                  <option>Bereket ve bolluk</option>
+                  <option>İş ve kariyer</option>
                   <option>Maddi hedefler</option>
-                  <option>Motivasyon ve odak</option>
+                  <option>Huzur ve denge</option>
+                  <option>Nazar ve korunma</option>
                   <option>Yeni başlangıç</option>
                 </select>
               )}
 
-              <textarea value={form.note} onChange={(e) => update("note", e.target.value)} placeholder="Eklemek istediğiniz özel not..." className="mt-4 min-h-32 w-full rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
+              <textarea value={form.note} onChange={(e) => update("note", e.target.value)} placeholder="Maddi veya manevi niyetinizi birkaç cümleyle yazın. Örn: bereket, iş, huzur, ilişki, korunma, yeni başlangıç..." className="mt-4 min-h-32 w-full rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
 
               <button onClick={() => setShowResult(true)} className="mt-6 rounded-full border border-amber-500 px-7 py-4 font-black text-amber-300 hover:bg-amber-500/10">
-                Ön Sonucu Gör
+                Niyet Özetini Gör
               </button>
 
               {showResult && (
                 <div className="mt-6 rounded-3xl border border-amber-500/30 bg-amber-500/10 p-6">
-                  <p className="text-sm font-bold uppercase tracking-[0.2em] text-amber-400">Uyumlu Öneri</p>
+                  <p className="text-sm font-bold uppercase tracking-[0.2em] text-amber-400">Hazırlık Özeti</p>
                   <h3 className="mt-2 text-2xl font-black">{selected.title}</h3>
                   <p className="mt-3 text-zinc-300">{resultText}</p>
                 </div>
@@ -561,8 +598,19 @@ export default function Home() {
               {error && <div className="mt-5 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">{error}</div>}
 
               <button disabled={loading} onClick={createOrder} className="mt-6 inline-flex w-full justify-center rounded-full bg-amber-500 px-8 py-4 text-lg font-black text-black hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60">
-                {loading ? "Sipariş oluşturuluyor..." : "Siparişi Oluştur - ₺1490"}
+                {loading ? "Sipariş oluşturuluyor..." : "Çalışmamı Başlat - ₺1990"}
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const tawk = (window as unknown as { Tawk_API?: { maximize?: () => void } }).Tawk_API;
+                  tawk?.maximize?.();
+                }}
+                className="mt-4 inline-flex w-full justify-center rounded-full border border-zinc-700 px-8 py-4 font-black text-zinc-100 hover:bg-zinc-900"
+              >
+                Canlı Destekten Sor
+              </button>
+
             </>
           )}
 
@@ -575,8 +623,8 @@ export default function Home() {
                 <p><b>Banka:</b> {ibanInfo.bank}</p>
                 <p><b>Alıcı:</b> {ibanInfo.owner}</p>
                 <p><b>IBAN:</b> <span className="break-all text-amber-300">{ibanInfo.iban}</span></p>
-                <p><b>Tutar:</b> 1490 TL</p>
-                <p><b>Açıklama:</b> MuhurZen {orderId}</p>
+                <p><b>Tutar:</b> 1990 TL</p>
+                <p><b>Açıklama:</b> MühürZen {orderId}</p>
               </div>
 
               <div className="mt-6 rounded-3xl border border-zinc-800 bg-black p-5">
@@ -655,7 +703,7 @@ export default function Home() {
         <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">
-              Müşteri Yorumları
+              Müşteri Deneyimi
             </p>
             <h2 className="mt-3 text-4xl font-black">
               Anlamlı hediye arayanların tercihi.
@@ -768,7 +816,7 @@ export default function Home() {
           <a href="/bakir-bileklik-faydalari">Bakır Bileklik</a>
           <a href="/kisiye-ozel-bakir-bileklik">Kişiye Özel</a>
         </div>
-        © 2026 MuhurZen. Kişisel kullanım ve hediye amaçlı özel tasarım aksesuar.
+        © 2026 MühürZen. Kişisel kullanım ve hediye amaçlı özel tasarım aksesuar.
       </footer>
     </main>
   );
