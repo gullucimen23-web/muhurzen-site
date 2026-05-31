@@ -3,6 +3,6 @@ import type { MetadataRoute } from "next";
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: { userAgent: "*", allow: "/" },
-    sitemap: "https://muhurzen.com/sitemap.xml",
+    sitemap: "https://mühürzen.com/sitemap.xml",
   };
 }
