@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Script from "next/script";
 import { useMemo, useState } from "react";
 import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
@@ -205,7 +206,7 @@ export default function Home() {
       window.location.hash = "tamamlandi";
     } catch (err) {
       console.error(err);
-      setError("Dekont yüklenemedi. Lütfen tekrar deneyin veya WhatsApp üzerinden ulaşın.");
+      setError("Dekont yüklenemedi. Lütfen tekrar deneyin veya canlı destek üzerinden bize ulaşın.");
     } finally {
       setReceiptLoading(false);
     }
@@ -241,7 +242,7 @@ export default function Home() {
       window.location.hash = "tamamlandi";
     } catch (err) {
       console.error(err);
-      setError("Ödeme bildirimi alınamadı. Lütfen WhatsApp üzerinden bize ulaşın.");
+      setError("Ödeme bildirimi alınamadı. Lütfen canlı destek üzerinden bize ulaşın.");
     } finally {
       setLoading(false);
     }
@@ -251,20 +252,21 @@ export default function Home() {
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: "MuhurZen Bakır Mühür Bilekliği",
-    image: ["https://muhurzen.com/images/bileklik-1.jpg"],
+    name: "MühürZen Bakır Mühür Bilekliği",
+    image: ["https://mühürzen.com/images/bileklik-1.jpg"],
     description:
       "İsme özel hazırlanan bakır mühür bilekliği. Süleyman Mührü işlenebilen kişiye özel tasarım bakır aksesuar.",
     brand: {
       "@type": "Brand",
-      name: "MuhurZen",
+      name: "MühürZen",
     },
     offers: {
       "@type": "Offer",
-      url: "https://muhurzen.com",
+      url: "https://mühürzen.com",
       priceCurrency: "TRY",
       price: "1490",
       availability: "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
     },
   };
 
@@ -307,19 +309,52 @@ export default function Home() {
     ],
   };
 
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "MühürZen",
+    url: "https://mühürzen.com",
+    logo: "https://mühürzen.com/og-image.png",
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "MühürZen",
+    url: "https://mühürzen.com",
+  };
+
   return (
     <main className="min-h-screen bg-black text-white">
-      <script
+      <Script
+        id="product-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(productSchema),
         }}
       />
 
-      <script
+      <Script
+        id="faq-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(faqSchema),
+        }}
+      />
+
+      <Script
+        id="organization-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(organizationSchema),
+        }}
+      />
+
+      <Script
+        id="website-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(websiteSchema),
         }}
       />
 
@@ -448,7 +483,7 @@ export default function Home() {
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Nasıl Hazırlanıyor?</p>
             <h2 className="mt-3 text-4xl font-black">Seri üretim değil, kişiye özel hazırlık.</h2>
             <div className="mt-8 grid gap-4">
-              {["Bilgilerini ve niyet alanını gönderirsin.", "Hazırlık süreci kişisel bilgilerle başlatılır.", "Bileklik özel kutusunda paketlenir.", "Kargo bilgisi WhatsApp üzerinden paylaşılır."].map((item, i) => (
+              {["Bilgilerini ve niyet alanını gönderirsin.", "Hazırlık süreci kişisel bilgilerle başlatılır.", "Bileklik özel kutusunda paketlenir.", "Kargo bilgisi sipariş takip ekranı üzerinden paylaşılır."].map((item, i) => (
                 <div key={item} className="flex gap-4 rounded-3xl border border-zinc-800 bg-zinc-950 p-5">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500 font-black text-black">{i + 1}</div>
                   <p className="pt-2 text-zinc-300">{item}</p>

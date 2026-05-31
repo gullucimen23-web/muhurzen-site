@@ -6,11 +6,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://mühürzen.com"),
   title: "MühürZen | Kişiye Özel Bakır Mühür Bilekliği",
   description:
-    "Kişiye özel hazırlanan bakır mühür bileklikleri. Geleneksel sembollerden ilham alan özel tasarım aksesuar.",
+    "Kişiye özel hazırlanan bakır mühür bileklikleri. Süleyman Mührü sembolü ve geleneksel motiflerden ilham alan özel tasarım bakır aksesuar.",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "MühürZen | Kişiye Özel Bakır Mühür Bilekliği",
     description:
-      "Ad ve doğum bilgilerine göre kişisel anlam taşıyacak şekilde hazırlanan özel tasarım bakır aksesuar.",
+      "Ad, tarih ve özel sembollerle kişisel anlam taşıyacak şekilde hazırlanan özel tasarım bakır aksesuar.",
     url: "https://mühürzen.com",
     siteName: "MühürZen",
     images: [
