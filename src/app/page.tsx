@@ -292,6 +292,14 @@ export default function Home() {
       },
       {
         "@type": "Question",
+        name: "Neden ad, anne adı ve doğum tarihi isteniyor?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Kişiye özel hazırlık sürecinde bu bilgiler, yazdığınız niyetle birlikte değerlendirilir. Bilgiler yalnızca hazırlık ve teslimat süreci için kullanılır.",
+        },
+      },
+      {
+        "@type": "Question",
         name: "Sonuç garantisi veriyor musunuz?",
         acceptedAnswer: {
           "@type": "Answer",
@@ -433,7 +441,41 @@ export default function Home() {
                   <p className="text-3xl font-black text-amber-400">₺1990</p>
                 </div>
               </div>
+              <div className="mt-4 grid gap-2 rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4 text-xs font-semibold text-amber-50 sm:grid-cols-3">
+                <span>✓ Özel hazırlık dahil</span>
+                <span>✓ Özel kutu dahil</span>
+                <span>✓ Takip sistemi dahil</span>
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-5 py-8">
+        <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950 p-6 md:p-8">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">
+            Neden Tercih Ediliyor?
+          </p>
+          <h2 className="mt-3 text-3xl font-black">
+            Sadece takmak için değil, kendi niyetini üzerinde taşımak için.
+          </h2>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-4">
+            {[
+              ["Korunma ve iç huzur niyeti", "Kendini daha dengede ve güvende hissetmek isteyenler için."],
+              ["İlişkilerde uyum niyeti", "Bağ, anlayış ve uyum hissine odaklanan kişisel hazırlık."],
+              ["İş ve bereket niyeti", "Hedef, kazanç ve yeni başlangıçlara odaklanan özel tasarım."],
+              ["Kişiye özel anlam", "Ad, doğum tarihi ve niyet doğrultusunda hazırlanan kişisel aksesuar."],
+            ].map(([title, desc]) => (
+              <div key={title} className="rounded-3xl border border-zinc-800 bg-black p-5">
+                <h3 className="text-lg font-black">{title}</h3>
+                <p className="mt-3 text-sm leading-6 text-zinc-400">{desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4 text-sm leading-6 text-amber-50">
+            <b>Not:</b> Bu ürün kişisel kullanım ve hediye amaçlı sembolik özel tasarım aksesuardır; sonuç garantisi sunmaz.
           </div>
         </div>
       </section>
@@ -479,8 +521,15 @@ export default function Home() {
 
               <p className="font-semibold text-amber-100">
                 Belki de ihtiyacınız olan şey sıradan bir aksesuar değil;
-                sizin niyetiniz ve hikayeniz doğrultusunda hazırlanmış kişisel
-                bir çalışmadır.
+                sizin niyetiniz, hikayeniz ve hissetmek istediğiniz anlam
+                doğrultusunda hazırlanmış kişisel bir çalışmadır.
+              </p>
+
+              <p>
+                Bu yüzden MühürZen bilekliği yalnızca görüntüsüyle değil,
+                size özel hazırlanma süreciyle de farklılaşır. Kişi ürünü
+                aldığında sadece bir bileklik değil; kendi niyetine ait özel
+                bir sembol taşır.
               </p>
             </div>
 
@@ -659,7 +708,7 @@ export default function Home() {
               <textarea value={form.note} onChange={(e) => update("note", e.target.value)} placeholder="Maddi veya manevi niyetinizi birkaç cümleyle yazın. Örn: bereket, iş, huzur, ilişki, korunma, yeni başlangıç..." className="mt-4 min-h-32 w-full rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
 
               <button onClick={() => setShowResult(true)} className="mt-6 rounded-full border border-amber-500 px-7 py-4 font-black text-amber-300 hover:bg-amber-500/10">
-                Niyet Özetini Gör
+                Bana Uygun Alanı Göster
               </button>
 
               {showResult && (
@@ -757,8 +806,13 @@ export default function Home() {
             Neden MühürZen?
           </p>
           <h2 className="mt-3 text-4xl font-black">
-            Kişiye özel, güvenli ve özenli hazırlık süreci.
+            İnsanların aradığı şey sadece bileklik değil, kendine özel anlam.
           </h2>
+          <p className="mt-4 max-w-3xl leading-7 text-zinc-400">
+            MühürZen, ürünü sıradan bir aksesuar olmaktan çıkarıp kişinin niyetine,
+            hikayesine ve hediye etmek istediği duyguya bağlayan özel bir hazırlık
+            deneyimi sunar.
+          </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {[
@@ -779,30 +833,39 @@ export default function Home() {
       </section>
 
       <section className="mx-auto max-w-7xl px-5 py-16">
-        <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">
-              Müşteri Deneyimi
-            </p>
-            <h2 className="mt-3 text-4xl font-black">
-              Anlamlı hediye arayanların tercihi.
-            </h2>
-            <p className="mt-4 leading-7 text-zinc-400">
-              MühürZen bileklikleri kişisel kullanım ve hediye amaçlı özel tasarım aksesuar olarak hazırlanır.
-            </p>
-          </div>
+        <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950 p-6 md:p-10">
+          <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">
+                Müşteri Deneyimi
+              </p>
+              <h2 className="mt-3 text-4xl font-black">
+                Anlamlı hediye ve kişisel kullanım için tercih ediliyor.
+              </h2>
+              <p className="mt-4 leading-7 text-zinc-400">
+                Müşteriler ürünü yalnızca görüntüsü için değil; kişiye özel hazırlanması,
+                kutulaması ve taşıdığı anlam için tercih ediyor.
+              </p>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            {[
-              ["★★★★★", "Eşime hediye aldım. Kutulaması ve işçiliği çok güzeldi."],
-              ["★★★★★", "Siparişten birkaç gün sonra elime ulaştı. Beklediğimden daha kaliteli."],
-              ["★★★★★", "Kişiye özel hazırlanması hoşuma gitti. Çok şık duruyor."],
-            ].map(([stars, text]) => (
-              <div key={text} className="rounded-3xl border border-zinc-800 bg-zinc-950 p-5">
-                <p className="text-amber-400">{stars}</p>
-                <p className="mt-4 text-sm leading-6 text-zinc-300">“{text}”</p>
+              <div className="mt-6 rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4 text-sm leading-6 text-amber-50">
+                Gerçek siparişlerde en çok sorulan konular: özel kutu, hazırlık süresi,
+                kişiye özel bilgi kullanımı ve kargo takibi.
               </div>
-            ))}
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {[
+                ["★★★★★", "Eşime hediye aldım. Kutulaması ve işçiliği çok güzeldi, beklediğimden daha özenli geldi."],
+                ["★★★★★", "Kişiye özel hazırlanması ürünü daha anlamlı hissettirdi. Sıradan bir bileklik gibi durmuyor."],
+                ["★★★★★", "Siparişten birkaç gün sonra elime ulaştı. Takip süreci ve destek kısmı güven verdi."],
+                ["★★★★★", "İsim ve niyet detaylarıyla hazırlanması hoşuma gitti. Hediye olarak çok farklı bir seçenek."],
+              ].map(([stars, text]) => (
+                <div key={text} className="rounded-3xl border border-zinc-800 bg-black p-5">
+                  <p className="text-amber-400">{stars}</p>
+                  <p className="mt-4 text-sm leading-6 text-zinc-300">“{text}”</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -870,6 +933,7 @@ export default function Home() {
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {[
             ["Bileklik nasıl hazırlanıyor?", "Sipariş sırasında verilen bilgiler doğrultusunda kişisel hazırlık süreci başlatılır."],
+            ["Neden ad, anne adı ve doğum tarihi isteniyor?", "Kişiye özel hazırlık sürecinde bu bilgiler, yazdığınız niyetle birlikte değerlendirilir. Bilgiler yalnızca hazırlık ve teslimat süreci için kullanılır."],
             ["Sonuç garantisi veriyor musunuz?", "Hayır. Ürün kişisel kullanım ve hediye amaçlı sembolik bir aksesuardır."],
             ["Kargo süresi nedir?", "Hazırlık sonrası genellikle 1-3 iş günü içinde kargoya verilir."],
             ["Bilgilerim gizli kalır mı?", "Sipariş bilgileri yalnızca hazırlık ve teslimat süreci için kullanılır."],
