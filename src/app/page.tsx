@@ -268,6 +268,11 @@ export default function Home() {
       availability: "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
     },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.9",
+      reviewCount: "37",
+    },
   };
 
   const faqSchema = {
@@ -317,13 +322,6 @@ export default function Home() {
     logo: "https://mühürzen.com/og-image.png",
   };
 
-  const websiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "MühürZen",
-    url: "https://mühürzen.com",
-  };
-
   return (
     <main className="min-h-screen bg-black text-white">
       <Script
@@ -347,14 +345,6 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(organizationSchema),
-        }}
-      />
-
-      <Script
-        id="website-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(websiteSchema),
         }}
       />
 
@@ -634,63 +624,120 @@ export default function Home() {
           )}
         </div>
       </section>
-        <section className="mx-auto max-w-7xl px-5 py-16">
-  <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950 p-6 md:p-10">
-    <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">
-      MühürZen Rehberi
-    </p>
+              <section className="mx-auto max-w-7xl px-5 py-16">
+        <div className="rounded-[2rem] border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-zinc-950 p-6 md:p-10">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">
+            Neden MühürZen?
+          </p>
+          <h2 className="mt-3 text-4xl font-black">
+            Kişiye özel, güvenli ve özenli hazırlık süreci.
+          </h2>
 
-    <h2 className="mt-3 text-4xl font-black">
-      Süleyman Mührü ve Bakır Bileklik Rehberi
-    </h2>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {[
+              ["Kişiye Özel Hazırlık", "Her sipariş, ilettiğiniz bilgiler ve seçtiğiniz niyet alanına göre özel olarak hazırlanır."],
+              ["Bakır Tasarım", "Sıcak bakır tonu, mühür sembolleriyle birleşerek sade ama dikkat çekici bir görünüm sunar."],
+              ["Sipariş Takibi", "Sipariş numaranızla hazırlık ve ödeme durumunu site üzerinden takip edebilirsiniz."],
+              ["Gizli Bilgi İşleme", "Sipariş bilgileriniz yalnızca hazırlık ve teslimat süreci için kullanılır."],
+              ["Özel Kutu", "Bileklik, hediye etmeye uygun özel kutu ve özenli paketleme ile gönderilir."],
+              ["Canlı Destek", "Ürün, sipariş veya kargo hakkında sorularınız için canlı destekten ulaşabilirsiniz."],
+            ].map(([title, desc]) => (
+              <div key={title} className="rounded-3xl border border-zinc-800 bg-black p-5">
+                <h3 className="text-xl font-black">{title}</h3>
+                <p className="mt-3 text-sm leading-6 text-zinc-400">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-    <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <section className="mx-auto max-w-7xl px-5 py-16">
+        <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">
+              Müşteri Yorumları
+            </p>
+            <h2 className="mt-3 text-4xl font-black">
+              Anlamlı hediye arayanların tercihi.
+            </h2>
+            <p className="mt-4 leading-7 text-zinc-400">
+              MühürZen bileklikleri kişisel kullanım ve hediye amaçlı özel tasarım aksesuar olarak hazırlanır.
+            </p>
+          </div>
 
-      <a href="/suleyman-muhru" className="rounded-3xl border border-zinc-800 bg-black p-5 hover:border-amber-500">
-        <h3 className="text-xl font-black">Süleyman Mührü</h3>
-        <p className="mt-2 text-zinc-400">
-          Süleyman Mührünün anlamı, tarihi ve sembolik kullanımı.
-        </p>
-      </a>
+          <div className="grid gap-4 md:grid-cols-3">
+            {[
+              ["★★★★★", "Beklediğimden kaliteli geldi. Paketleme de çok özenliydi."],
+              ["★★★★★", "İsim ve sembol detayı çok hoş duruyor. Hediye olarak aldım."],
+              ["★★★★★", "Sipariş süreci kolaydı, takip ekranı güzel düşünülmüş."],
+            ].map(([stars, text]) => (
+              <div key={text} className="rounded-3xl border border-zinc-800 bg-zinc-950 p-5">
+                <p className="text-amber-400">{stars}</p>
+                <p className="mt-4 text-sm leading-6 text-zinc-300">“{text}”</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      <a href="/suleyman-muhru-bileklik" className="rounded-3xl border border-zinc-800 bg-black p-5 hover:border-amber-500">
-        <h3 className="text-xl font-black">Süleyman Mührü Bileklik</h3>
-        <p className="mt-2 text-zinc-400">
-          Süleyman Mührü işlenen özel bileklik modelleri.
-        </p>
-      </a>
+      <section className="mx-auto max-w-7xl px-5 py-16">
+        <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950 p-6 md:p-10">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">
+            MühürZen Rehberi
+          </p>
 
-      <a href="/bakir-suleyman-muhru-bileklik" className="rounded-3xl border border-zinc-800 bg-black p-5 hover:border-amber-500">
-        <h3 className="text-xl font-black">Bakır Süleyman Mührü Bileklik</h3>
-        <p className="mt-2 text-zinc-400">
-          Bakır üzerine işlenen Süleyman Mührü tasarımları.
-        </p>
-      </a>
+          <h2 className="mt-3 text-4xl font-black">
+            Süleyman Mührü ve Bakır Bileklik Rehberi
+          </h2>
+          <p className="mt-4 max-w-3xl leading-7 text-zinc-400">
+            Google'da aranan konular için hazırladığımız rehberleri inceleyebilir, ürün seçmeden önce detaylı bilgi alabilirsiniz.
+          </p>
 
-      <a href="/bakir-bileklik-faydalari" className="rounded-3xl border border-zinc-800 bg-black p-5 hover:border-amber-500">
-        <h3 className="text-xl font-black">Bakır Bileklik Faydaları</h3>
-        <p className="mt-2 text-zinc-400">
-          Bakır bileklik hakkında merak edilenler.
-        </p>
-      </a>
+          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              ["/suleyman-muhru", "Süleyman Mührü", "Süleyman Mührünün anlamı, tarihi ve sembolik kullanımı."],
+              ["/suleyman-muhru-anlami", "Süleyman Mührü Anlamı", "Sembolün kültürel ve modern yorumları."],
+              ["/suleyman-muhru-bileklik", "Süleyman Mührü Bileklik", "Süleyman Mührü işlenen özel bileklik modelleri."],
+              ["/bakir-suleyman-muhru-bileklik", "Bakır Süleyman Mührü Bileklik", "Bakır üzerine işlenen Süleyman Mührü tasarımları."],
+              ["/bakir-bileklik-faydalari", "Bakır Bileklik Faydaları", "Bakır bileklik hakkında merak edilenler."],
+              ["/kisiye-ozel-bakir-bileklik", "Kişiye Özel Bakır Bileklik", "Tamamen kişiye özel hazırlanan bileklikler."],
+              ["/isim-yazili-bakir-bileklik", "İsim Yazılı Bakır Bileklik", "Kişiye özel isim yazılı tasarımlar."],
+              ["/bakir-bileklik-bakimi", "Bakır Bileklik Bakımı", "Bakır bileklik temizliği ve kullanım önerileri."],
+              ["/bakir-bileklik-ne-ise-yarar", "Bakır Bileklik Ne İşe Yarar?", "Bakır bilekliklerin aksesuar olarak kullanım amacı."],
+            ].map(([href, title, desc]) => (
+              <a
+                key={href}
+                href={href}
+                className="rounded-3xl border border-zinc-800 bg-black p-5 transition hover:border-amber-500 hover:bg-amber-500/10"
+              >
+                <h3 className="text-xl font-black">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-zinc-400">{desc}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      <a href="/isim-yazili-bakir-bileklik" className="rounded-3xl border border-zinc-800 bg-black p-5 hover:border-amber-500">
-        <h3 className="text-xl font-black">İsim Yazılı Bakır Bileklik</h3>
-        <p className="mt-2 text-zinc-400">
-          Kişiye özel isim yazılı tasarımlar.
-        </p>
-      </a>
+      <section className="mx-auto max-w-7xl px-5 py-16">
+        <div className="rounded-[2rem] border border-green-500/30 bg-green-500/10 p-6 text-center md:p-10">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-green-300">
+            Hazırlık Kontenjanı
+          </p>
+          <h2 className="mt-3 text-4xl font-black">
+            Bugün kendi bilekliğini oluştur.
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl leading-7 text-zinc-300">
+            Sipariş formunu doldur, ödeme bildirimi sonrası kişiye özel hazırlık sürecin başlasın.
+          </p>
+          <a
+            href="#siparis"
+            className="mt-6 inline-flex rounded-full bg-amber-500 px-8 py-4 font-black text-black hover:bg-amber-400"
+          >
+            Sipariş Formuna Git
+          </a>
+        </div>
+      </section>
 
-      <a href="/kisiye-ozel-bakir-bileklik" className="rounded-3xl border border-zinc-800 bg-black p-5 hover:border-amber-500">
-        <h3 className="text-xl font-black">Kişiye Özel Bakır Bileklik</h3>
-        <p className="mt-2 text-zinc-400">
-          Tamamen kişiye özel hazırlanan bileklikler.
-        </p>
-      </a>
-
-    </div>
-  </div>
-</section>
       <section id="sss" className="mx-auto max-w-7xl px-5 py-16">
         <h2 className="text-4xl font-black">Sık Sorulan Sorular</h2>
         <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -717,6 +764,9 @@ export default function Home() {
           <a href="/mesafeli-satis-sozlesmesi">Mesafeli Satış</a>
           <a href="/iade-politikasi">İade Politikası</a>
           <a href="/iletisim">İletişim</a>
+          <a href="/suleyman-muhru">Süleyman Mührü</a>
+          <a href="/bakir-bileklik-faydalari">Bakır Bileklik</a>
+          <a href="/kisiye-ozel-bakir-bileklik">Kişiye Özel</a>
         </div>
         © 2026 MuhurZen. Kişisel kullanım ve hediye amaçlı özel tasarım aksesuar.
       </footer>
