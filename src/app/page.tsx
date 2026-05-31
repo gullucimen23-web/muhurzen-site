@@ -263,7 +263,6 @@ export default function Home() {
             <a href="#hazirlik" className="hover:text-white">Hazırlık</a>
             <a href="#sss" className="hover:text-white">SSS</a>
             <a href="/takip" className="hover:text-white">Sipariş Takip</a>
-            <a href="/admin" className="hover:text-white">Admin</a>
           </nav>
           <a href="#siparis" className="rounded-full bg-amber-500 px-5 py-2 text-sm font-bold text-black hover:bg-amber-400">
             Bilekliğini Oluştur
