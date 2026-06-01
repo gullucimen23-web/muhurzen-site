@@ -35,6 +35,9 @@ const ibanInfo = {
   owner: "Derya Çimen",
 };
 
+const whatsappUrl =
+  "https://wa.me/905534236441?text=Merhaba,%20M%C3%BCh%C3%BCrZen%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum.";
+
 const intents = {
   iliski: {
     label: "İlişki & Uyum",
@@ -137,7 +140,7 @@ export default function Home() {
         ...form,
         intentTitle: selected.title,
         productName: "MühürZen Bakır Mühür Bilekliği",
-        amount: 1990,
+        amount: 1600,
         currency: "TRY",
         paymentStatus: "bekliyor",
         orderStatus: "odeme_bekliyor",
@@ -159,7 +162,7 @@ export default function Home() {
         phone: form.phone,
         city: form.city,
         intentTitle: selected.title,
-        amount: 1990,
+        amount: 1600,
         paymentStatus: "bekliyor",
         orderStatus: "odeme_bekliyor",
       });
@@ -200,7 +203,7 @@ export default function Home() {
         phone: form.phone,
         city: form.city,
         intentTitle: selected.title,
-        amount: 1990,
+        amount: 1600,
         paymentStatus: "odeme_bildirildi",
         orderStatus: "odeme_kontrol",
       });
@@ -209,7 +212,7 @@ export default function Home() {
       window.location.hash = "tamamlandi";
     } catch (err) {
       console.error(err);
-      setError("Dekont yüklenemedi. Lütfen tekrar deneyin veya canlı destek üzerinden bize ulaşın.");
+      setError("Dekont yüklenemedi. Lütfen tekrar deneyin veya WhatsApp üzerinden bize ulaşın.");
     } finally {
       setReceiptLoading(false);
     }
@@ -236,7 +239,7 @@ export default function Home() {
         phone: form.phone,
         city: form.city,
         intentTitle: selected.title,
-        amount: 1990,
+        amount: 1600,
         paymentStatus: "odeme_bildirildi",
         orderStatus: "odeme_kontrol",
       });
@@ -245,7 +248,7 @@ export default function Home() {
       window.location.hash = "tamamlandi";
     } catch (err) {
       console.error(err);
-      setError("Ödeme bildirimi alınamadı. Lütfen canlı destek üzerinden bize ulaşın.");
+      setError("Ödeme bildirimi alınamadı. Lütfen WhatsApp üzerinden bize ulaşın.");
     } finally {
       setLoading(false);
     }
@@ -267,7 +270,7 @@ export default function Home() {
       "@type": "Offer",
       url: "https://mühürzen.com",
       priceCurrency: "TRY",
-      price: "1990",
+      price: "1600",
       availability: "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
     },
@@ -370,8 +373,8 @@ export default function Home() {
             <a href="#sss" className="hover:text-white">SSS</a>
             <a href="/takip" className="hover:text-white">Sipariş Takip</a>
           </nav>
-          <a href="#siparis" className="rounded-full bg-amber-500 px-5 py-2 text-sm font-bold text-black hover:bg-amber-400">
-            Çalışmamı Başlat
+          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="rounded-full bg-amber-500 px-5 py-2 text-sm font-bold text-black hover:bg-amber-400">
+            WhatsApp'tan Bilgi Al
           </a>
         </div>
       </header>
@@ -405,8 +408,8 @@ export default function Home() {
           </div>
 
           <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
-            <a href="#siparis" className="rounded-full bg-amber-500 px-8 py-4 text-center font-black text-black hover:bg-amber-400">
-              Çalışmamı Başlat
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="rounded-full bg-amber-500 px-8 py-4 text-center font-black text-black hover:bg-amber-400">
+              WhatsApp'tan Bilgi Al
             </a>
             <a href="#hazirlik" className="rounded-full border border-zinc-700 px-8 py-4 text-center font-bold hover:bg-zinc-900">
               Süreç Nasıl İşliyor?
@@ -438,7 +441,7 @@ export default function Home() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-zinc-400 line-through">₺2990</p>
-                  <p className="text-3xl font-black text-amber-400">₺1990</p>
+                  <p className="text-3xl font-black text-amber-400">₺1600</p>
                 </div>
               </div>
               <div className="mt-4 grid gap-2 rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4 text-xs font-semibold text-amber-50 sm:grid-cols-3">
@@ -482,7 +485,7 @@ export default function Home() {
 
       <section className="mx-auto max-w-7xl px-5 py-8">
         <div className="grid gap-4 md:grid-cols-4">
-          {["Kişiye özel hazırlık", "Türkiye geneli gönderim", "Gizli bilgi işleme", "Canlı destek"].map((item) => (
+          {["Kişiye özel hazırlık", "Türkiye geneli gönderim", "Gizli bilgi işleme", "WhatsApp destek"].map((item) => (
             <div key={item} className="rounded-3xl border border-zinc-800 bg-zinc-950 p-5 font-bold">✓ {item}</div>
           ))}
         </div>
@@ -566,10 +569,12 @@ export default function Home() {
           </div>
 
           <a
-            href="#siparis"
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-8 inline-flex rounded-full bg-amber-500 px-8 py-4 font-black text-black hover:bg-amber-400"
           >
-            Çalışmamı Başlat
+            WhatsApp'tan Bilgi Al
           </a>
         </div>
       </section>
@@ -619,7 +624,7 @@ export default function Home() {
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-amber-400">Önerilen Alan</p>
             <h3 className="mt-2 text-2xl font-black">{selected.title}</h3>
             <p className="mt-3 max-w-3xl text-zinc-300">{resultText}</p>
-            <a href="#siparis" className="mt-5 inline-flex rounded-full bg-amber-500 px-6 py-3 font-black text-black hover:bg-amber-400">Bu Niyetle Devam Et</a>
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex rounded-full bg-amber-500 px-6 py-3 font-black text-black hover:bg-amber-400">WhatsApp'tan Devam Et</a>
           </div>
         </div>
       </section>
@@ -726,18 +731,16 @@ export default function Home() {
               {error && <div className="mt-5 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">{error}</div>}
 
               <button disabled={loading} onClick={createOrder} className="mt-6 inline-flex w-full justify-center rounded-full bg-amber-500 px-8 py-4 text-lg font-black text-black hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60">
-                {loading ? "Sipariş oluşturuluyor..." : "Çalışmamı Başlat - ₺1990"}
+                {loading ? "Sipariş oluşturuluyor..." : "Çalışmamı Başlat - ₺1600"}
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const tawk = (window as unknown as { Tawk_API?: { maximize?: () => void } }).Tawk_API;
-                  tawk?.maximize?.();
-                }}
-                className="mt-4 inline-flex w-full justify-center rounded-full border border-zinc-700 px-8 py-4 font-black text-zinc-100 hover:bg-zinc-900"
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex w-full justify-center rounded-full border border-green-600 bg-green-600/10 px-8 py-4 font-black text-green-100 hover:bg-green-600/20"
               >
-                Canlı Destekten Sor
-              </button>
+                WhatsApp'tan Sor
+              </a>
 
             </>
           )}
@@ -751,7 +754,7 @@ export default function Home() {
                 <p><b>Banka:</b> {ibanInfo.bank}</p>
                 <p><b>Alıcı:</b> {ibanInfo.owner}</p>
                 <p><b>IBAN:</b> <span className="break-all text-amber-300">{ibanInfo.iban}</span></p>
-                <p><b>Tutar:</b> 1990 TL</p>
+                <p><b>Tutar:</b> 1600 TL</p>
                 <p><b>Açıklama:</b> MühürZen {orderId}</p>
               </div>
 
@@ -821,7 +824,7 @@ export default function Home() {
               ["Sipariş Takibi", "Sipariş numaranızla hazırlık ve ödeme durumunu site üzerinden takip edebilirsiniz."],
               ["Gizli Bilgi İşleme", "Sipariş bilgileriniz yalnızca hazırlık ve teslimat süreci için kullanılır."],
               ["Özel Kutu", "Bileklik, hediye etmeye uygun özel kutu ve özenli paketleme ile gönderilir."],
-              ["Canlı Destek", "Ürün, sipariş veya kargo hakkında sorularınız için canlı destekten ulaşabilirsiniz."],
+              ["Canlı Destek", "Ürün, sipariş veya kargo hakkında sorularınız için WhatsApp üzerinden ulaşabilirsiniz."],
             ].map(([title, desc]) => (
               <div key={title} className="rounded-3xl border border-zinc-800 bg-black p-5">
                 <h3 className="text-xl font-black">{title}</h3>
@@ -920,10 +923,12 @@ export default function Home() {
             Sipariş formunu doldur, ödeme bildirimi sonrası kişiye özel hazırlık sürecin başlasın.
           </p>
           <a
-            href="#siparis"
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-6 inline-flex rounded-full bg-amber-500 px-8 py-4 font-black text-black hover:bg-amber-400"
           >
-            Sipariş Formuna Git
+            WhatsApp'tan Bilgi Al
           </a>
         </div>
       </section>
@@ -946,6 +951,16 @@ export default function Home() {
         </div>
       </section>
 
+
+      <a
+        href={whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="WhatsApp'tan bilgi al"
+        className="fixed bottom-5 right-5 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-green-500 text-3xl shadow-2xl shadow-green-500/30 transition hover:scale-105 hover:bg-green-400"
+      >
+        ☎
+      </a>
 
       <footer className="border-t border-zinc-900 px-5 py-10 text-center text-sm text-zinc-500">
         <div className="mb-4 flex flex-wrap justify-center gap-5">
