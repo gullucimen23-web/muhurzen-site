@@ -3,13 +3,8 @@
 import Image from "next/image";
 import Script from "next/script";
 import { useMemo, useState } from "react";
-import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { db, storage } from "@/lib/firebase";
 
 type Flow = "iliski" | "manevi" | "maddi";
-type Step = "form" | "payment" | "done";
-
 type FormState = {
   intent: Flow;
   name: string;
@@ -29,14 +24,7 @@ type FormState = {
   note: string;
 };
 
-const ibanInfo = {
-  bank: "Deniz Bankası",
-  iban: "TR17 0013 4000 0262 2803 7000 01",
-  owner: "Derya Çimen",
-};
-
-const whatsappUrl =
-  "https://wa.me/905534236441?text=Merhaba,%20M%C3%BCh%C3%BCrZen%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum.";
+const whatsappBaseUrl = "https://wa.me/905534236441";
 
 const intents = {
   iliski: {
@@ -78,26 +66,10 @@ const initialForm: FormState = {
   note: "",
 };
 
-async function notifyTelegram(payload: Record<string, unknown>) {
-  try {
-    await fetch("/api/telegram", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-  } catch {
-    // Sipariş akışını Telegram hatası yüzünden durdurmuyoruz.
-  }
-}
 
 export default function Home() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [showResult, setShowResult] = useState(false);
-  const [step, setStep] = useState<Step>("form");
-  const [orderId, setOrderId] = useState("");
-  const [receiptUrl, setReceiptUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [receiptLoading, setReceiptLoading] = useState(false);
   const [error, setError] = useState("");
 
   const selected = intents[form.intent];
@@ -118,140 +90,34 @@ export default function Home() {
     setError("");
   };
 
-  const createOrder = async () => {
-    if (!form.name || !form.motherName || !form.birthDate || !form.phone || !form.city || !form.address) {
-      setError("Lütfen ad soyad, anne adı, doğum tarihi, telefon, şehir ve adres alanlarını doldurun.");
-      return;
-    }
+  const buildWhatsappUrl = () => {
+    const lines = [
+      "Merhaba, MühürZen için çalışmamı başlatmak istiyorum.",
+      `Niyet alanı: ${selected.title}`,
+      form.q1 ? `Odak: ${form.q1}` : "",
+      form.q2 ? `Hissettiğim: ${form.q2}` : "",
+      form.q3 ? `Amaç: ${form.q3}` : "",
+      form.name ? `Ad Soyad: ${form.name}` : "",
+      form.motherName ? `Anne Adı: ${form.motherName}` : "",
+      form.birthDate ? `Doğum Tarihi: ${form.birthDate}` : "",
+      form.phone ? `Telefon: ${form.phone}` : "",
+      form.intent === "iliski" && form.partnerName ? `İkinci Kişi: ${form.partnerName}` : "",
+      form.note ? `Niyet notum: ${form.note}` : "",
+    ].filter(Boolean);
 
-    if (
-      form.intent === "iliski" &&
-      (!form.partnerName || !form.partnerMotherName || !form.partnerBirthDate || !form.relationshipStatus)
-    ) {
-      setError("İlişki & Uyum niyeti için ikinci kişinin ad soyad, anne adı, doğum tarihi ve ilişki durumunu ekleyin.");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const refDoc = await addDoc(collection(db, "orders"), {
-        ...form,
-        intentTitle: selected.title,
-        productName: "MühürZen Bakır Mühür Bilekliği",
-        amount: 1600,
-        currency: "TRY",
-        paymentStatus: "bekliyor",
-        orderStatus: "odeme_bekliyor",
-        paymentMethod: "iban",
-        ibanInfo,
-        receiptUrl: "",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-
-      setOrderId(refDoc.id);
-      setStep("payment");
-      window.location.hash = "odeme";
-
-      await notifyTelegram({
-        type: "new_order",
-        orderId: refDoc.id,
-        name: form.name,
-        phone: form.phone,
-        city: form.city,
-        intentTitle: selected.title,
-        amount: 1600,
-        paymentStatus: "bekliyor",
-        orderStatus: "odeme_bekliyor",
-      });
-    } catch (err) {
-      console.error(err);
-      setError("Sipariş oluşturulamadı. Lütfen tekrar deneyin.");
-    } finally {
-      setLoading(false);
-    }
+    return `${whatsappBaseUrl}?text=${encodeURIComponent(lines.join("\\n"))}`;
   };
 
-  const uploadReceipt = async (file: File) => {
-    if (!orderId) return;
-
-    setReceiptLoading(true);
-    setError("");
-
-    try {
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const receiptRef = ref(storage, `receipts/${orderId}/${Date.now()}-${safeName}`);
-      await uploadBytes(receiptRef, file);
-      const url = await getDownloadURL(receiptRef);
-
-      await updateDoc(doc(db, "orders", orderId), {
-        receiptUrl: url,
-        paymentStatus: "odeme_bildirildi",
-        orderStatus: "odeme_kontrol",
-        paidNotifiedAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-
-      setReceiptUrl(url);
-
-      await notifyTelegram({
-        type: "receipt_uploaded",
-        orderId,
-        name: form.name,
-        phone: form.phone,
-        city: form.city,
-        intentTitle: selected.title,
-        amount: 1600,
-        paymentStatus: "odeme_bildirildi",
-        orderStatus: "odeme_kontrol",
-      });
-
-      setStep("done");
-      window.location.hash = "tamamlandi";
-    } catch (err) {
-      console.error(err);
-      setError("Dekont yüklenemedi. Lütfen tekrar deneyin veya WhatsApp üzerinden bize ulaşın.");
-    } finally {
-      setReceiptLoading(false);
+  const startWhatsapp = () => {
+    if (!form.name || !form.motherName || !form.birthDate || !form.phone) {
+      setError("Lütfen ad soyad, anne adı, doğum tarihi ve telefon alanlarını doldurun.");
+      return;
     }
-  };
-
-  const notifyPaid = async () => {
-    if (!orderId) return;
-
-    setLoading(true);
-    setError("");
-
-    try {
-      await updateDoc(doc(db, "orders", orderId), {
-        paymentStatus: "odeme_bildirildi",
-        orderStatus: "odeme_kontrol",
-        paidNotifiedAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-
-      await notifyTelegram({
-        type: "payment_notified",
-        orderId,
-        name: form.name,
-        phone: form.phone,
-        city: form.city,
-        intentTitle: selected.title,
-        amount: 1600,
-        paymentStatus: "odeme_bildirildi",
-        orderStatus: "odeme_kontrol",
-      });
-
-      setStep("done");
-      window.location.hash = "tamamlandi";
-    } catch (err) {
-      console.error(err);
-      setError("Ödeme bildirimi alınamadı. Lütfen WhatsApp üzerinden bize ulaşın.");
-    } finally {
-      setLoading(false);
+    if (!form.note) {
+      setError("Lütfen niyetinizi birkaç cümleyle yazın.");
+      return;
     }
+    window.open(buildWhatsappUrl(), "_blank", "noopener,noreferrer");
   };
 
 
@@ -265,14 +131,6 @@ export default function Home() {
     brand: {
       "@type": "Brand",
       name: "MühürZen",
-    },
-    offers: {
-      "@type": "Offer",
-      url: "https://mühürzen.com",
-      priceCurrency: "TRY",
-      price: "1600",
-      availability: "https://schema.org/InStock",
-      itemCondition: "https://schema.org/NewCondition",
     },
     aggregateRating: {
       "@type": "AggregateRating",
@@ -373,8 +231,8 @@ export default function Home() {
             <a href="#sss" className="hover:text-white">SSS</a>
             <a href="/takip" className="hover:text-white">Sipariş Takip</a>
           </nav>
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="rounded-full bg-amber-500 px-5 py-2 text-sm font-bold text-black hover:bg-amber-400">
-            WhatsApp'tan Bilgi Al
+          <a href="#siparis" className="rounded-full bg-amber-500 px-5 py-2 text-sm font-bold text-black hover:bg-amber-400">
+            Çalışmamı Başlat
           </a>
         </div>
       </header>
@@ -408,8 +266,8 @@ export default function Home() {
           </div>
 
           <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="rounded-full bg-amber-500 px-8 py-4 text-center font-black text-black hover:bg-amber-400">
-              WhatsApp'tan Bilgi Al
+            <a href="#siparis" className="rounded-full bg-amber-500 px-8 py-4 text-center font-black text-black hover:bg-amber-400">
+              Çalışmamı Başlat
             </a>
             <a href="#hazirlik" className="rounded-full border border-zinc-700 px-8 py-4 text-center font-bold hover:bg-zinc-900">
               Süreç Nasıl İşliyor?
@@ -440,8 +298,8 @@ export default function Home() {
                   <p className="mt-1 text-xs text-zinc-500">İsim • Anne adı • Doğum tarihi • Niyet</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-zinc-400 line-through">₺2990</p>
-                  <p className="text-3xl font-black text-amber-400">₺1600</p>
+                  <p className="text-sm text-zinc-400">Fiyat bilgisi</p>
+                  <p className="text-xl font-black text-amber-400">WhatsApp'ta</p>
                 </div>
               </div>
               <div className="mt-4 grid gap-2 rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4 text-xs font-semibold text-amber-50 sm:grid-cols-3">
@@ -569,12 +427,10 @@ export default function Home() {
           </div>
 
           <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#siparis"
             className="mt-8 inline-flex rounded-full bg-amber-500 px-8 py-4 font-black text-black hover:bg-amber-400"
           >
-            WhatsApp'tan Bilgi Al
+            Çalışmamı Başlat
           </a>
         </div>
       </section>
@@ -624,7 +480,7 @@ export default function Home() {
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-amber-400">Önerilen Alan</p>
             <h3 className="mt-2 text-2xl font-black">{selected.title}</h3>
             <p className="mt-3 max-w-3xl text-zinc-300">{resultText}</p>
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex rounded-full bg-amber-500 px-6 py-3 font-black text-black hover:bg-amber-400">WhatsApp'tan Devam Et</a>
+            <a href={buildWhatsappUrl()} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex rounded-full bg-amber-500 px-6 py-3 font-black text-black hover:bg-amber-400">Çalışmamı Başlat</a>
           </div>
         </div>
       </section>
@@ -649,158 +505,77 @@ export default function Home() {
 
       <section id="siparis" className="mx-auto max-w-7xl px-5 py-16">
         <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950 p-6 md:p-10">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Kişiye Özel Hazırlık Formu</p>
-          <h2 className="mt-3 text-3xl font-black sm:text-4xl">Bilgilerinizi girin, çalışmanızı başlatalım.</h2>
-          <p className="mt-4 max-w-3xl leading-7 text-zinc-400">Ad soyad, anne adı, doğum tarihi ve niyet alanınız kişiye özel hazırlık sürecinde değerlendirilir.</p>
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">Kişiye Özel Hazırlık</p>
+          <h2 className="mt-3 text-3xl font-black sm:text-4xl">Niyetinizi seçin, çalışmanızı WhatsApp'tan başlatalım.</h2>
+          <p className="mt-4 max-w-3xl leading-7 text-zinc-400">
+            Fiyatı sitede göstermiyoruz. Önce niyet alanınızı ve temel bilgilerinizi gönderin; size uygun çalışma hakkında WhatsApp üzerinden bilgi verelim.
+          </p>
 
-          {step === "form" && (
-            <>
-              <div className="mt-8 grid gap-3 rounded-3xl border border-amber-500/20 bg-black p-4 text-sm text-zinc-300 sm:grid-cols-3">
-                <div><b className="text-amber-400">1.</b> Bilgilerini gir</div>
-                <div><b className="text-amber-400">2.</b> Niyetini yaz</div>
-                <div><b className="text-amber-400">3.</b> Ödeme bildir</div>
-              </div>
+          <div className="mt-8 grid gap-3 rounded-3xl border border-amber-500/20 bg-black p-4 text-sm text-zinc-300 sm:grid-cols-3">
+            <div><b className="text-amber-400">1.</b> Niyet alanını seç</div>
+            <div><b className="text-amber-400">2.</b> Bilgilerini yaz</div>
+            <div><b className="text-amber-400">3.</b> WhatsApp'tan gönder</div>
+          </div>
 
-              <div className="mt-8 grid gap-4 md:grid-cols-3">
-                {Object.entries(intents).map(([key, item]) => (
-                  <button key={key} onClick={() => update("intent", key as Flow)} className={`rounded-3xl border p-5 text-left ${form.intent === key ? "border-amber-500 bg-amber-500/10" : "border-zinc-800 bg-black"}`}>
-                    <h3 className="text-lg font-black">{item.label}</h3>
-                    <p className="mt-2 text-sm text-zinc-400">{item.desc}</p>
-                  </button>
-                ))}
-              </div>
-
-              <div className="mt-8 grid gap-4 md:grid-cols-3">
-                <input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Ad Soyad" className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
-                <input value={form.motherName} onChange={(e) => update("motherName", e.target.value)} placeholder="Anne Adı" className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
-                <input value={form.birthDate} onChange={(e) => update("birthDate", e.target.value)} type="date" className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
-                <input value={form.phone} onChange={(e) => update("phone", e.target.value)} placeholder="Telefon" className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
-                <input value={form.city} onChange={(e) => update("city", e.target.value)} placeholder="Şehir" className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
-                <input value={form.address} onChange={(e) => update("address", e.target.value)} placeholder="Adres" className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
-              </div>
-
-              {form.intent === "iliski" && (
-                <div className="mt-6 rounded-3xl border border-zinc-800 bg-black p-5">
-                  <h3 className="text-xl font-black">İkinci Kişi Bilgileri</h3>
-                  <div className="mt-4 grid gap-4 md:grid-cols-3">
-                    <input value={form.partnerName} onChange={(e) => update("partnerName", e.target.value)} placeholder="İkinci Kişi Ad Soyad" className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />
-                    <input value={form.partnerMotherName} onChange={(e) => update("partnerMotherName", e.target.value)} placeholder="İkinci Kişi Anne Adı" className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />
-                    <input value={form.partnerBirthDate} onChange={(e) => update("partnerBirthDate", e.target.value)} type="date" className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />
-                  </div>
-                  <select value={form.relationshipStatus} onChange={(e) => update("relationshipStatus", e.target.value)} className="mt-4 w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500">
-                    <option value="">İlişki Durumu</option>
-                    <option>Evli</option>
-                    <option>Nişanlı</option>
-                    <option>Sevgili</option>
-                    <option>Flört</option>
-                    <option>Uzak mesafe / ayrı</option>
-                  </select>
-                </div>
-              )}
-
-              {(form.intent === "maddi" || form.intent === "manevi") && (
-                <select value={form.focusArea} onChange={(e) => update("focusArea", e.target.value)} className="mt-6 w-full rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500">
-                  <option value="">Niyet Alanı Seç</option>
-                  <option>Bereket ve bolluk</option>
-                  <option>İş ve kariyer</option>
-                  <option>Maddi hedefler</option>
-                  <option>Huzur ve denge</option>
-                  <option>Nazar ve korunma</option>
-                  <option>Yeni başlangıç</option>
-                </select>
-              )}
-
-              <textarea value={form.note} onChange={(e) => update("note", e.target.value)} placeholder="Maddi veya manevi niyetinizi birkaç cümleyle yazın. Örn: bereket, iş, huzur, ilişki, korunma, yeni başlangıç..." className="mt-4 min-h-32 w-full rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
-
-              <button onClick={() => setShowResult(true)} className="mt-6 rounded-full border border-amber-500 px-7 py-4 font-black text-amber-300 hover:bg-amber-500/10">
-                Bana Uygun Alanı Göster
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {Object.entries(intents).map(([key, item]) => (
+              <button key={key} onClick={() => update("intent", key as Flow)} className={`rounded-3xl border p-5 text-left ${form.intent === key ? "border-amber-500 bg-amber-500/10" : "border-zinc-800 bg-black"}`}>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">{item.eyebrow}</p>
+                <h3 className="mt-2 text-lg font-black">{item.label}</h3>
+                <p className="mt-2 text-sm leading-6 text-zinc-400">{item.desc}</p>
               </button>
+            ))}
+          </div>
 
-              {showResult && (
-                <div className="mt-6 rounded-3xl border border-amber-500/30 bg-amber-500/10 p-6">
-                  <p className="text-sm font-bold uppercase tracking-[0.2em] text-amber-400">Hazırlık Özeti</p>
-                  <h3 className="mt-2 text-2xl font-black">{selected.title}</h3>
-                  <p className="mt-3 text-zinc-300">{resultText}</p>
-                </div>
-              )}
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            <input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Ad Soyad" className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
+            <input value={form.motherName} onChange={(e) => update("motherName", e.target.value)} placeholder="Anne Adı" className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
+            <input value={form.birthDate} onChange={(e) => update("birthDate", e.target.value)} type="date" className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
+            <input value={form.phone} onChange={(e) => update("phone", e.target.value)} placeholder="Telefon" className="rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
+          </div>
 
-              <div className="mt-6 rounded-2xl bg-zinc-900 p-5 text-sm leading-6 text-zinc-300">
-                Bu ürün dekoratif ve kişisel kullanım amaçlı özel tasarım aksesuardır. Tıbbi, psikolojik, finansal veya manevi sonuç garantisi sunmaz.
-              </div>
-
-              {error && <div className="mt-5 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">{error}</div>}
-
-              <button disabled={loading} onClick={createOrder} className="mt-6 inline-flex w-full justify-center rounded-full bg-amber-500 px-8 py-4 text-lg font-black text-black hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60">
-                {loading ? "Sipariş oluşturuluyor..." : "Çalışmamı Başlat - ₺1600"}
-              </button>
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-flex w-full justify-center rounded-full border border-green-600 bg-green-600/10 px-8 py-4 font-black text-green-100 hover:bg-green-600/20"
-              >
-                WhatsApp'tan Sor
-              </a>
-
-            </>
-          )}
-
-          {step === "payment" && (
-            <div id="odeme" className="mt-8 rounded-[2rem] border border-amber-500/30 bg-amber-500/10 p-6">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-amber-400">Ödeme Bekleniyor</p>
-              <h3 className="mt-3 text-3xl font-black">Siparişin oluşturuldu.</h3>
-              <p className="mt-3 text-zinc-300">Sipariş No: <b>{orderId}</b></p>
-              <div className="mt-6 grid gap-3 rounded-3xl bg-black p-5 text-zinc-200">
-                <p><b>Banka:</b> {ibanInfo.bank}</p>
-                <p><b>Alıcı:</b> {ibanInfo.owner}</p>
-                <p><b>IBAN:</b> <span className="break-all text-amber-300">{ibanInfo.iban}</span></p>
-                <p><b>Tutar:</b> 1600 TL</p>
-                <p><b>Açıklama:</b> MühürZen {orderId}</p>
-              </div>
-
-              <div className="mt-6 rounded-3xl border border-zinc-800 bg-black p-5">
-                <h4 className="text-xl font-black">Dekont Yükle</h4>
-                <p className="mt-2 text-sm text-zinc-400">
-                  Dekont yüklemek zorunlu değildir; yüklerseniz ödeme kontrolü daha hızlı yapılır.
-                </p>
-                <input
-                  type="file"
-                  accept="image/*,application/pdf"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) uploadReceipt(file);
-                  }}
-                  className="mt-4 w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 text-sm"
-                />
-                {receiptUrl && (
-                  <a href={receiptUrl} target="_blank" className="mt-3 inline-flex text-sm font-bold text-amber-300">
-                    Yüklenen dekontu görüntüle
-                  </a>
-                )}
-              </div>
-
-              <p className="mt-5 text-sm leading-6 text-zinc-300">Ödeme açıklamasına sipariş numaranı yaz. Ödemeden sonra aşağıdaki butona bas; siparişin ödeme kontrol listesine düşer.</p>
-              {error && <div className="mt-5 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">{error}</div>}
-              <button disabled={loading || receiptLoading} onClick={notifyPaid} className="mt-6 w-full rounded-full bg-amber-500 px-8 py-4 text-lg font-black text-black hover:bg-amber-400 disabled:opacity-60">
-                {loading || receiptLoading ? "İşlem alınıyor..." : "Ödemeyi Yaptım"}
-              </button>
+          {form.intent === "iliski" && (
+            <div className="mt-6 rounded-3xl border border-zinc-800 bg-black p-5">
+              <h3 className="text-xl font-black">İlişki niyeti için ek bilgi</h3>
+              <p className="mt-2 text-sm leading-6 text-zinc-400">
+                İlişki niyetinde ikinci kişinin bilgileri WhatsApp görüşmesinde alınabilir. İsterseniz adını aşağıya yazabilirsiniz.
+              </p>
+              <input value={form.partnerName} onChange={(e) => update("partnerName", e.target.value)} placeholder="İkinci kişi adı soyadı (isteğe bağlı)" className="mt-4 w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4 outline-none focus:border-amber-500" />
             </div>
           )}
 
-          {step === "done" && (
-            <div id="tamamlandi" className="mt-8 rounded-[2rem] border border-green-500/30 bg-green-500/10 p-6">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-green-300">Ödeme Bildirimi Alındı</p>
-              <h3 className="mt-3 text-3xl font-black">Teşekkürler, siparişin kontrol listesine düştü.</h3>
-              <p className="mt-3 text-zinc-300">Sipariş No: <b>{orderId}</b></p>
-              <p className="mt-4 text-zinc-300">Ödeme kontrolünden sonra hazırlık süreci başlatılacaktır.</p>
-              <div className="mt-5 rounded-2xl bg-black p-4 text-sm text-zinc-300">
-                Siparişini takip etmek için bu numarayı sakla: <b>{orderId}</b>
-              </div>
-              <a href={`/takip?orderId=${orderId}`} className="mt-6 mr-3 inline-flex rounded-full bg-amber-500 px-8 py-4 font-black text-black hover:bg-amber-400">
-                Siparişimi Takip Et
-              </a>
+          <textarea value={form.note} onChange={(e) => update("note", e.target.value)} placeholder="Niyetinizi birkaç cümleyle yazın. Örn: ilişki, kısmet, bereket, korunma, huzur, yeni başlangıç..." className="mt-6 min-h-32 w-full rounded-2xl border border-zinc-800 bg-black px-5 py-4 outline-none focus:border-amber-500" />
+
+          <button onClick={() => setShowResult(true)} className="mt-6 rounded-full border border-amber-500 px-7 py-4 font-black text-amber-300 hover:bg-amber-500/10">
+            Bana Uygun Alanı Göster
+          </button>
+
+          {showResult && (
+            <div className="mt-6 rounded-3xl border border-amber-500/30 bg-amber-500/10 p-6">
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-amber-400">Hazırlık Özeti</p>
+              <h3 className="mt-2 text-2xl font-black">{selected.title}</h3>
+              <p className="mt-3 text-zinc-300">{resultText}</p>
             </div>
           )}
+
+          <div className="mt-6 rounded-2xl bg-zinc-900 p-5 text-sm leading-6 text-zinc-300">
+            Bu ürün dekoratif ve kişisel kullanım amaçlı özel tasarım aksesuardır. Tıbbi, psikolojik, finansal veya manevi sonuç garantisi sunmaz.
+          </div>
+
+          {error && <div className="mt-5 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">{error}</div>}
+
+          <button onClick={startWhatsapp} className="mt-6 inline-flex w-full justify-center rounded-full bg-amber-500 px-8 py-4 text-lg font-black text-black hover:bg-amber-400">
+            Çalışmamı Başlat
+          </button>
+
+          <a
+            href={buildWhatsappUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex w-full justify-center rounded-full border border-green-600 bg-green-600/10 px-8 py-4 font-black text-green-100 hover:bg-green-600/20"
+          >
+            WhatsApp'tan Sor
+          </a>
         </div>
       </section>
               <section className="mx-auto max-w-7xl px-5 py-16">
@@ -923,12 +698,10 @@ export default function Home() {
             Sipariş formunu doldur, ödeme bildirimi sonrası kişiye özel hazırlık sürecin başlasın.
           </p>
           <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#siparis"
             className="mt-6 inline-flex rounded-full bg-amber-500 px-8 py-4 font-black text-black hover:bg-amber-400"
           >
-            WhatsApp'tan Bilgi Al
+            Çalışmamı Başlat
           </a>
         </div>
       </section>
@@ -953,7 +726,7 @@ export default function Home() {
 
 
       <a
-        href={whatsappUrl}
+        href={buildWhatsappUrl()}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="WhatsApp'tan bilgi al"
